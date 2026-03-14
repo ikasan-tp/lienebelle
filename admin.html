@@ -176,7 +176,7 @@
 
     .stream-fields-wrap {
       grid-column:1/-1;
-      display:grid; grid-template-columns:8rem 1fr 1fr;
+      display:grid; grid-template-columns:8rem 1fr 1fr 1fr;
       gap:1rem;
     }
 
@@ -550,6 +550,10 @@ function renderRows(data){
           <input class="field-input" id="content${i}" type="text" placeholder="例：雑談 / 歌枠" value="${d.content||''}">
         </div>
         <div class="field-group stream-fields">
+          <span class="field-label">配信タイトル</span>
+          <input class="field-input" id="title${i}" type="text" placeholder="例：〇〇をやってみた" value="${d.title||''}">
+        </div>
+        <div class="field-group stream-fields">
           <span class="field-label">カード裏メモ</span>
           <textarea class="field-textarea" id="note${i}" placeholder="カードを裏返したとき表示されるメモ">${d.note||''}</textarea>
         </div>
@@ -576,6 +580,7 @@ function collectData(){
       day: d.day,
       time:    isRest ? '' : (document.getElementById('time'+i)?.value.trim()||''),
       content: isRest ? '' : (document.getElementById('content'+i)?.value.trim()||''),
+      title:   isRest ? '' : (document.getElementById('title'+i)?.value.trim()||''),
       note:    isRest ? '' : (document.getElementById('note'+i)?.value||''),
     };
   });
@@ -608,8 +613,8 @@ function initImgRows(days){
       <div class="img-field-group">
         <span class="img-field-label">配信タイトル</span>
         <input class="img-field-input" id="imgTitle${i}" type="text"
-          placeholder="${isRest ? '配信なし' : (d.content || '配信タイトル')}"
-          value="" oninput="imgData[${i}].title=this.value">
+          placeholder="${isRest ? '配信なし' : '例：〇〇をやってみた'}"
+          value="${d.title||''}" oninput="imgData[${i}].title=this.value; renderImage();">
       </div>
       <div class="img-field-group img-thumb-wrap">
         <span class="img-field-label">サムネイル画像</span>
@@ -883,25 +888,25 @@ async function renderImage(){
         ctx.fillStyle='#8a7050';
         ctx.textAlign='left';
         ctx.fillText(d.time + ' —', tx, textY);
-        textY += 19;
+        textY += 20;
       }
 
       // 配信内容
       if(d.content){
-        ctx.font='400 16px "EB Garamond", serif';
+        ctx.font='600 17px "EB Garamond", serif';
         ctx.fillStyle='#3e3018';
         ctx.textAlign='left';
         ctx.fillText(d.content, tx, textY);
-        textY += 19;
+        textY += 22;
       }
 
-      // カスタムタイトル
-      const title = imgData[i]?.title||'';
+      // 配信タイトル（スケジュール編集側で入力したもの）
+      const title = d.title || imgData[i]?.title || '';
       if(title){
-        ctx.font='italic 400 13px "EB Garamond", serif';
-        ctx.fillStyle='rgba(100,80,40,0.65)';
+        ctx.font='italic 400 14px "EB Garamond", serif';
+        ctx.fillStyle='rgba(90,70,30,0.75)';
         ctx.textAlign='left';
-        wrapText(ctx, title, tx, textY, cardW-INNER_PAD*2, 16);
+        wrapText(ctx, title, tx, textY, cardW-INNER_PAD*2, 17);
       }
     }
 
