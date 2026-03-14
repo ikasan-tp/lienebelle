@@ -880,6 +880,7 @@
         <span class="ch-label">streaming schedule</span>
         <div class="ch-title">Schedule</div>
         <span class="ch-title-jp">配信予定</span>
+<span id="schedPeriod"></span>
       </div>
       <div class="sched-grid" id="schedGrid">
         </div>
@@ -1089,13 +1090,13 @@ document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 /* ══ SCHEDULE: render from localStorage ══ */
 const SCHED_KEY = 'lienebelle_schedule';
 const SCHED_DEFAULT = [
-  {day:'月',time:'21:00',content:'雑談',note:'〈雑談テーマ〉'},
+  {day:'月',time:'21:00',content:'雑談 / 夢語り',note:'夢の話や\n日常雑談'},
   {day:'火',time:'',content:'',note:''},
-  {day:'水',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
-  {day:'木',time:'21:00',content:'作業配信',note:'B3Dの学習'},
-  {day:'金',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+  {day:'水',time:'22:00',content:'ゲーム配信',note:'様々なゲームを\n夢の目で遊ぶ'},
+  {day:'木',time:'',content:'',note:''},
+  {day:'金',time:'21:00',content:'歌枠',note:'夢の声で\n歌をうたう'},
   {day:'土',time:'',content:'',note:''},
-  {day:'日',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+  {day:'日',time:'20:00',content:'不定期枠',note:'気まぐれな\n夢の時間'},
 ];
 const rotations = [-0.7,0.5,-0.4,0.6,-0.5,0.4,-0.3];
 const delays = ['d1','d1','d1','d2','d2','d2','d2'];
@@ -1103,10 +1104,20 @@ const delays = ['d1','d1','d1','d2','d2','d2','d2'];
 function renderSchedule(){
   const raw = localStorage.getItem(SCHED_KEY);
   const data = raw ? JSON.parse(raw) : SCHED_DEFAULT;
+  
+  // ---【追加：日付の反映】---
+  const savedDuration = localStorage.getItem(SCHED_KEY + '_duration');
+  const periodEl = document.getElementById('schedPeriod');
+  if(periodEl && savedDuration) {
+    periodEl.textContent = savedDuration;
+  }
+  // -----------------------
+
   const grid = document.getElementById('schedGrid');
   if(!grid) return;
   grid.innerHTML = data.map((d,i) => {
-    const hasStream = d.time || d.content;
+    // 判定ロジック：空文字の場合は「配信なし」にする
+    const hasStream = (d.time && d.time !== '') || (d.content && d.content !== '');
     const noteHtml = (d.note||'—').replace(/\n/g,'<br>');
     return `
     <div class="sched-card rv ${delays[i]}" style="--r:${rotations[i]}deg">
@@ -1130,6 +1141,7 @@ function renderSchedule(){
         </div>
       </div>
     </div>`;
+  
   // re-observe new elements
   grid.querySelectorAll('.rv').forEach(el => io.observe(el));
 }
