@@ -690,7 +690,8 @@
     }
 
     /* ══════════════ LINKS ══════════════ */
-    .links-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.6rem; }
+    .links-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.6rem; }
+    @media(max-width:760px){ .links-grid { grid-template-columns:1fr; } }
     .ticket {
       background:var(--page-lt);
       border:1px solid rgba(120,90,30,.22);
@@ -710,6 +711,7 @@
     .ticket:hover::before { width:6px; }
     .ticket.yt::before { background:linear-gradient(to bottom,rgba(180,40,40,.7),rgba(122,30,42,.9)); }
     .ticket.tw::before { background:linear-gradient(to bottom,rgba(80,60,30,.5),rgba(120,90,30,.8)); }
+    .ticket.bt::before { background:linear-gradient(to bottom,rgba(80,50,120,.5),rgba(60,35,100,.8)); }
     /* 右端のミシン目なし */
     /* shimmer */
     .ticket-sheen {
@@ -731,9 +733,11 @@
     }
     .ticket.yt .t-icon { background:rgba(122,30,42,.08); border:1px solid rgba(122,30,42,.22); }
     .ticket.tw .t-icon { background:rgba(100,78,40,.08); border:1px solid rgba(100,78,40,.22); }
+    .ticket.bt .t-icon { background:rgba(80,50,120,.08); border:1px solid rgba(80,50,120,.22); }
     .ticket:hover .t-icon { transform:scale(1.08); }
     .ticket.yt:hover .t-icon { background:rgba(122,30,42,.16); }
     .ticket.tw:hover .t-icon { background:rgba(100,78,40,.16); }
+    .ticket.bt:hover .t-icon { background:rgba(80,50,120,.16); }
     .t-icon svg { width:17px; height:17px; }
     .t-name { font-family:'Playfair Display',serif; font-style:italic; font-size:1.12rem; color:var(--ink); line-height:1; }
     .t-handle { font-family:'Cormorant Unicase',serif; font-size:.58rem; letter-spacing:.18em; color:var(--faded); margin-top:.25rem; display:block; }
@@ -1252,6 +1256,24 @@
           </div>
           <div class="t-body">
             <span class="t-desc">Updates &amp; Daily Posts</span>
+            <span class="t-arr">Open →</span>
+          </div>
+        </a>
+        <a href="https://lienebelle.booth.pm/" target="_blank" class="ticket bt">
+          <div class="ticket-sheen"></div>
+          <div class="t-header">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 3h18v4H3zM3 9h12v12H3zM17 9h4v12h-4z" fill="rgba(80,50,120,.65)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="t-name">Booth</div>
+              <span class="t-handle">lienebelle</span>
+            </div>
+          </div>
+          <div class="t-body">
+            <span class="t-desc">Goods &amp; Merchandise</span>
             <span class="t-arr">Open →</span>
           </div>
         </a>
