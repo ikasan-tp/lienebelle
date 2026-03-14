@@ -880,7 +880,6 @@
         <span class="ch-label">streaming schedule</span>
         <div class="ch-title">Schedule</div>
         <span class="ch-title-jp">配信予定</span>
-<span id="schedPeriod"></span>
       </div>
       <div class="sched-grid" id="schedGrid">
         </div>
@@ -1087,7 +1086,7 @@ heroObs.observe(heroPage);
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.07});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 
-/* ══ SCHEDULE: render from Database (Supabase) ══ */
+/* ══ SCHEDULE: render from localStorage ══ */
 const SCHED_KEY = 'lienebelle_schedule';
 const SCHED_DEFAULT = [
   {day:'月',time:'21:00',content:'雑談',note:'〈雑談タイトル〉'},
@@ -1100,9 +1099,6 @@ const SCHED_DEFAULT = [
 ];
 const rotations = [-0.7,0.5,-0.4,0.6,-0.5,0.4,-0.3];
 const delays = ['d1','d1','d1','d2','d2','d2','d2'];
-
-const SUPABASE_URL = 'https://bjriwruvryptbxhcencf.supabase.co'; 
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcml3cnV2cnlwdGJ4aGNlbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODI3MjEsImV4cCI6MjA4OTA1ODcyMX0.LRJOsq5Xd3Cp_MmmWUjqLn850yJ0aYzqeu98XmKeYyE';
 
 async function renderSchedule(){
   let data = SCHED_DEFAULT;
@@ -1117,14 +1113,19 @@ async function renderSchedule(){
     });
     const result = await response.json();
     
-    if (result && result.length > 0) {
+    // 修正ポイント：daysが空配列の場合も、デフォルト（SCHED_DEFAULT）を使うように変更
+    if (result && result.length > 0 && result[0].data) {
       duration = result[0].data.duration || "";
-      data = result[0].data.days || SCHED_DEFAULT;
+      const daysFromDb = result[0].data.days;
+      if (daysFromDb && daysFromDb.length > 0) {
+        data = daysFromDb;
+      }
     }
   } catch (e) {
     console.error("データ取得に失敗しました。デフォルトを表示します。", e);
   }
 
+  // ---【日付（期間）の反映】---
   const periodEl = document.getElementById('schedPeriod');
   if(periodEl) {
     periodEl.textContent = duration;
@@ -1133,6 +1134,7 @@ async function renderSchedule(){
   const grid = document.getElementById('schedGrid');
   if(!grid) return;
 
+  // カードの描画
   grid.innerHTML = data.map((d,i) => {
     const hasStream = (d.time && d.time !== '') || (d.content && d.content !== '');
     const noteHtml = (d.note||'—').replace(/\n/g,'<br>');
@@ -1159,10 +1161,11 @@ async function renderSchedule(){
       </div>
     </div>`;
   
+  // スクロールアニメーションの再適用
   grid.querySelectorAll('.rv').forEach(el => io.observe(el));
 }
-
 renderSchedule();
+
 /* ══ MOBILE NAV ══ */
 const mNav=document.getElementById('mNav');
 document.getElementById('burger').addEventListener('click',()=>mNav.classList.add('open'));
