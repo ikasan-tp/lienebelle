@@ -879,7 +879,7 @@
       <div class="ch-head rv">
         <span class="ch-label">streaming schedule</span>
         <div class="ch-title">Schedule</div>
-        <span class="ch-title-jp">配信予定</span>
+<span class="ch-title-jp">配信予定 <span id="schedPeriod" style="margin-left: 1.2rem; font-family: 'EB Garamond', serif; font-size: 0.9rem; opacity: 0.7;"></span></span>
       </div>
       <div class="sched-grid" id="schedGrid">
         </div>
@@ -1109,12 +1109,12 @@ async function renderSchedule(){
   let duration = "";
 
   try {
-    const response = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=eq.lienebelle&select=data`, {
-      headers: {
-        'apikey': SUPABASE_KEY,
-        'Authorization': `Bearer ${SUPABASE_KEY}`
-      }
-    });
+const response = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=eq.lienebelle&select=data&t=${Date.now()}`, {
+  headers: {
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`
+  }
+});
     const result = await response.json();
     
     // データが存在し、かつ days が空ではない場合のみ反映
