@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>管理室 — Bibliotheca Somnii</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Cormorant+Unicase:wght@300;400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --void:    #0e0c0a;
+      --desk:    #141008;
+      --page:    #e4d8bc;
+      --page2:   #ddd0b4;
+      --page-lt: #ece2cc;
+      --ink:     #28200e;
+      --ink2:    #3e3018;
+      --ink3:    #6a5530;
+      --faded:   #8a7050;
+      --wine:    #7a1e2a;
+      --wine2:   #9e2838;
+      --gold:    #a07c3a;
+      --gold2:   #7a5c28;
+      --gold3:   #c09850;
+      --ok:      #2a5820;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--void);
+      font-family: 'EB Garamond', serif;
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 3rem 1rem 5rem;
+    }
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        repeating-linear-gradient(91deg,transparent 0,transparent 40px,rgba(255,255,255,.006) 40px,rgba(255,255,255,.006) 42px),
+        radial-gradient(ellipse at 40% 30%,#1c1410 0%,#0a0808 70%);
+    }
+    body::after {
+      content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23g)' opacity='0.04'/%3E%3C/svg%3E");
+      mix-blend-mode: overlay;
+    }
+
+    .wrap {
+      position: relative; z-index: 2;
+      max-width: 860px; margin: 0 auto;
+    }
+
+    /* ── header ledger ── */
+    .ledger-header {
+      background: var(--page);
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(100,75,30,.3), 0 8px 40px rgba(0,0,0,.7);
+      padding: 2.5rem 3.5rem 2rem;
+      margin-bottom: 2rem;
+      position: relative;
+      background-image: repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(120,90,30,.07) 26px,rgba(120,90,30,.07) 27px);
+      animation: pageDrop .8s cubic-bezier(.22,.61,.36,1) both;
+    }
+    .ledger-header::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(to right,rgba(80,50,10,.18) 0%,transparent 6%);
+      border-radius:2px; pointer-events:none;
+    }
+    .ledger-header::after {
+      content:''; position:absolute; inset:8px;
+      border:1px solid rgba(120,90,30,.18); border-radius:1px; pointer-events:none;
+    }
+    @keyframes pageDrop {
+      0%   { opacity:0; transform:translateY(-40px) rotate(-.8deg); }
+      60%  { opacity:1; transform:translateY(5px) rotate(.2deg); }
+      100% { opacity:1; transform:translateY(0) rotate(0deg); }
+    }
+
+    .header-eyebrow {
+      font-family:'Cormorant Unicase',serif; font-size:.65rem;
+      letter-spacing:.35em; color:var(--gold2); text-transform:uppercase;
+      display:flex; align-items:center; gap:.7rem; margin-bottom:.7rem;
+    }
+    .header-eyebrow::before { content:''; width:20px; height:1px; background:var(--gold2); }
+    .header-title {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:clamp(1.8rem,4vw,2.8rem); color:var(--ink); line-height:1;
+    }
+    .header-sub {
+      font-family:'Cormorant Unicase',serif; font-size:.7rem;
+      letter-spacing:.28em; color:var(--ink3); margin-top:.4rem; display:block;
+    }
+    .header-rule { width:100%; height:1px; margin:1.2rem 0 .8rem; background:linear-gradient(to right,rgba(160,124,58,.4),transparent); }
+    .header-note {
+      font-family:'Caveat',cursive; font-size:.92rem; color:var(--faded); line-height:1.7;
+    }
+    .back-link {
+      display:inline-flex; align-items:center; gap:.5rem;
+      font-family:'Cormorant Unicase',serif; font-size:.68rem;
+      letter-spacing:.2em; color:var(--faded); text-decoration:none;
+      margin-top:1rem; transition:color .2s;
+    }
+    .back-link:hover { color:var(--ink3); }
+    .back-link::before { content:'←'; font-family:serif; }
+
+    /* ── schedule ledger ── */
+    .ledger-body {
+      background: var(--page);
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(100,75,30,.28), 0 8px 40px rgba(0,0,0,.65);
+      padding: 2.5rem 3.5rem 3rem;
+      position: relative;
+      background-image: repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(120,90,30,.07) 26px,rgba(120,90,30,.07) 27px);
+      animation: pageDrop .9s .15s cubic-bezier(.22,.61,.36,1) both;
+    }
+    .ledger-body::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(to right,rgba(80,50,10,.16) 0%,transparent 6%);
+      border-radius:2px; pointer-events:none;
+    }
+    .ledger-body::after {
+      content:''; position:absolute; inset:8px;
+      border:1px solid rgba(120,90,30,.16); border-radius:1px; pointer-events:none;
+    }
+    .ledger-body > * { position:relative; z-index:1; }
+
+    .section-label {
+      font-family:'Caveat',cursive; font-size:.88rem;
+      color:var(--faded); display:block; margin-bottom:1.8rem;
+      border-bottom:1px dashed rgba(120,90,30,.2); padding-bottom:.6rem;
+    }
+
+    /* ── day rows ── */
+    .day-rows { display:flex; flex-direction:column; gap:1.4rem; }
+
+    .day-row {
+      display:grid; grid-template-columns:2.2rem 1fr;
+      gap:.5rem 1rem; align-items:start;
+      padding-bottom:1.4rem;
+      border-bottom:1px solid rgba(120,90,30,.12);
+    }
+    .day-row:last-child { border-bottom:none; padding-bottom:0; }
+
+    .day-label {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:1.9rem; color:var(--ink); line-height:1; padding-top:.35rem;
+    }
+
+    .field-group { display:flex; flex-direction:column; gap:.3rem; }
+    .field-label {
+      font-family:'Caveat',cursive; font-size:.75rem;
+      color:var(--faded); letter-spacing:.08em;
+    }
+    .field-input, .field-textarea {
+      font-family:'EB Garamond',serif; font-size:1rem; color:var(--ink);
+      background:rgba(255,255,255,.35);
+      border:none; border-bottom:1px solid rgba(120,90,30,.35);
+      padding:.35rem .2rem;
+      width:100%; outline:none;
+      transition:border-color .2s, background .2s;
+    }
+    .field-input:focus, .field-textarea:focus {
+      border-bottom-color:var(--wine);
+      background:rgba(255,255,255,.55);
+    }
+    .field-textarea { resize:none; height:3.6rem; line-height:1.6; }
+
+    .rest-toggle {
+      display:flex; align-items:center; gap:.6rem;
+      font-family:'Caveat',cursive; font-size:.88rem; color:var(--faded);
+      cursor:pointer; user-select:none; padding-top:.55rem;
+    }
+    .rest-toggle input[type=checkbox] { accent-color:var(--wine); width:14px; height:14px; cursor:pointer; }
+
+    .stream-fields-wrap {
+      grid-column:1/-1;
+      display:grid; grid-template-columns:8rem 1fr 1fr;
+      gap:1rem;
+    }
+
+    /* fields hidden when rest */
+    .day-row.is-rest .stream-fields-wrap { display:none; }
+    .day-row.is-rest .day-label { color:var(--faded); }
+
+    /* ── action bar ── */
+    .action-bar {
+      display:flex; align-items:center; justify-content:space-between;
+      margin-top:2.5rem; gap:1rem; flex-wrap:wrap;
+    }
+    .btn-save {
+      font-family:'Cormorant Unicase',serif; font-size:.78rem; letter-spacing:.22em;
+      text-transform:uppercase; color:var(--page);
+      background:var(--wine); border:none; cursor:pointer;
+      padding:.75rem 2.2rem; border-radius:1px;
+      box-shadow:0 2px 12px rgba(122,30,42,.4);
+      transition:background .2s, transform .15s, box-shadow .2s;
+    }
+    .btn-save:hover { background:var(--wine2); transform:translateY(-1px); box-shadow:0 4px 18px rgba(122,30,42,.5); }
+    .btn-save:active { transform:translateY(0); }
+
+    .btn-reset {
+      font-family:'Caveat',cursive; font-size:.88rem;
+      color:var(--faded); background:none; border:1px solid rgba(120,90,30,.3);
+      padding:.5rem 1.2rem; cursor:pointer; border-radius:1px;
+      transition:color .2s, border-color .2s;
+    }
+    .btn-reset:hover { color:var(--ink3); border-color:rgba(120,90,30,.6); }
+
+    .save-msg {
+      font-family:'Caveat',cursive; font-size:.9rem;
+      color:var(--ok); opacity:0; transition:opacity .4s;
+      display:flex; align-items:center; gap:.4rem;
+    }
+    .save-msg.show { opacity:1; }
+    .save-msg::before { content:'✓'; }
+
+    /* responsive */
+    @media(max-width:640px){
+      .ledger-header, .ledger-body { padding:2rem 1.5rem; }
+      .day-row { grid-template-columns:2rem 1fr 1fr; }
+      .day-row .field-group:last-child { grid-column:2/-1; }
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- Header -->
+  <div class="ledger-header">
+    <div class="header-eyebrow">Bibliotheca Somnii</div>
+    <div class="header-title">管理室</div>
+    <span class="header-sub">Schedule Editor</span>
+    <div class="header-rule"></div>
+    <p class="header-note">
+      配信スケジュールを編集して「保存」を押すと、<br>
+      トップページのスケジュール欄に反映されます。<br>
+      （同じブラウザで開いている場合のみ）
+    </p>
+    <a href="index.html" class="back-link">トップページへ戻る</a>
+  </div>
+
+  <!-- Schedule editor -->
+  <div class="ledger-body">
+    <span class="section-label">配信スケジュール — 週間</span>
+    <div class="day-rows" id="dayRows">
+      <!-- JS rendered -->
+    </div>
+    <div class="action-bar">
+      <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;">
+        <button class="btn-save" onclick="saveSchedule()">保存して反映</button>
+        <button class="btn-reset" onclick="resetSchedule()">デフォルトに戻す</button>
+      </div>
+      <div class="save-msg" id="saveMsg">保存しました</div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const SCHED_KEY = 'lienebelle_schedule';
+const DAYS_DEFAULT = [
+  {day:'月',time:'21:00',content:'雑談 / 夢語り',note:'夢の話や\n日常雑談'},
+  {day:'火',time:'',content:'',note:''},
+  {day:'水',time:'22:00',content:'ゲーム配信',note:'様々なゲームを\n夢の目で遊ぶ'},
+  {day:'木',time:'',content:'',note:''},
+  {day:'金',time:'21:00',content:'歌枠',note:'夢の声で\n歌をうたう'},
+  {day:'土',time:'',content:'',note:''},
+  {day:'日',time:'20:00',content:'不定期枠',note:'気まぐれな\n夢の時間'},
+];
+
+function loadData(){
+  try { return JSON.parse(localStorage.getItem(SCHED_KEY)) || DAYS_DEFAULT; }
+  catch(e){ return DAYS_DEFAULT; }
+}
+
+function renderRows(data){
+  const container = document.getElementById('dayRows');
+  container.innerHTML = data.map((d,i) => {
+    const isRest = !d.time && !d.content;
+    return `
+    <div class="day-row${isRest?' is-rest':''}" id="row${i}">
+      <div class="day-label">${d.day}</div>
+      <label class="rest-toggle">
+        <input type="checkbox" ${isRest?'checked':''} onchange="toggleRest(${i},this.checked)">
+        配信なし
+      </label>
+      <div class="stream-fields-wrap">
+        <div class="field-group stream-fields">
+          <span class="field-label">開始時間</span>
+          <input class="field-input" id="time${i}" type="text" placeholder="例：21:00" value="${d.time||''}">
+        </div>
+        <div class="field-group stream-fields">
+          <span class="field-label">内容</span>
+          <input class="field-input" id="content${i}" type="text" placeholder="例：雑談 / 歌枠" value="${d.content||''}">
+        </div>
+        <div class="field-group stream-fields">
+          <span class="field-label">カード裏メモ</span>
+          <textarea class="field-textarea" id="note${i}" placeholder="カードを裏返したとき表示されるメモ">${d.note||''}</textarea>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function toggleRest(i, isRest){
+  const row = document.getElementById('row'+i);
+  row.classList.toggle('is-rest', isRest);
+  if(isRest){
+    document.getElementById('time'+i).value = '';
+    document.getElementById('content'+i).value = '';
+  }
+}
+
+function collectData(){
+  return DAYS_DEFAULT.map((d,i) => {
+    const row = document.getElementById('row'+i);
+    const isRest = row.classList.contains('is-rest');
+    return {
+      day: d.day,
+      time:    isRest ? '' : (document.getElementById('time'+i)?.value.trim()||''),
+      content: isRest ? '' : (document.getElementById('content'+i)?.value.trim()||''),
+      note:    isRest ? '' : (document.getElementById('note'+i)?.value||''),
+    };
+  });
+}
+
+function saveSchedule(){
+  const data = collectData();
+  localStorage.setItem(SCHED_KEY, JSON.stringify(data));
+  const msg = document.getElementById('saveMsg');
+  msg.classList.add('show');
+  setTimeout(()=>msg.classList.remove('show'), 2500);
+}
+
+function resetSchedule(){
+  if(!confirm('デフォルトのスケジュールに戻しますか？')) return;
+  localStorage.removeItem(SCHED_KEY);
+  renderRows(DAYS_DEFAULT);
+}
+
+// init
+renderRows(loadData());
+</script>
+</body>
+</html>

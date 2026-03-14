@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lienebelle</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text x='50%' y='50%' style='dominant-baseline:central;text-anchor:middle;font-size:80px;fill:%23a07c3a;'>✥</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=EB+Garamond:ital,wght@0,400;0,500;1,400;1,500&family=Cormorant+Unicase:wght@300;400&family=Caveat:wght@400;600&display=swap" rel="stylesheet">
+  <style>
+
+    /* アニメーション定義 */
+    @keyframes pulseBtn {
+      0% { box-shadow: 0 0 0 0 rgba(160, 124, 58, 0); border-color: rgba(160, 124, 58, 0.3); }
+      50% { box-shadow: 0 0 15px 1px rgba(160, 124, 58, 0.15); border-color: rgba(160, 124, 58, 0.6); }
+      100% { box-shadow: 0 0 0 0 rgba(160, 124, 58, 0); border-color: rgba(160, 124, 58, 0.3); }
+    }
+    .enter-button {
+      background: rgba(160, 124, 58, 0.05);
+      border: 1px solid rgba(160, 124, 58, 0.4);
+      color: var(--page);
+      padding: 1rem 3.5rem;
+      font-family: 'Cormorant Unicase', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: pulseBtn 3s infinite;
+      outline: none;
+    }
+    .enter-button:hover {
+      background: rgba(160, 124, 58, 0.12);
+      border-color: var(--gold);
+      letter-spacing: 0.5em;
+      padding-left: 3.8rem;
+      padding-right: 3.2rem;
+    }
+
+    :root {
+      --void:     #0e0c0a;
+      --page:     #e4d8bc;
+      --page2:    #ddd0b4;
+      --page-lt:  #ece2cc;
+      --ink:      #28200e;
+      --ink2:     #3e3018;
+      --ink3:     #6a5530;
+      --faded:    #8a7050;
+      --wine:     #7a1e2a;
+      --wine2:    #9e2838;
+      --gold:     #a07c3a;
+      --gold2:    #7a5c28;
+      --gold3:    #c09850;
+      --stamp-ok: #2a5820;
+      --stamp-ng: #7a1418;
+      --stamp-q:  #5a4010;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    /* 画像の保存・ドラッグ禁止 */
+    img {
+      pointer-events: none;
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+
+    body {
+      background: var(--void);
+      font-family: 'EB Garamond', serif;
+      color: var(--ink);
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* desk grain */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        repeating-linear-gradient(91deg,transparent 0,transparent 40px,rgba(255,255,255,.007) 40px,rgba(255,255,255,.007) 42px),
+        repeating-linear-gradient(89deg,transparent 0,transparent 25px,rgba(0,0,0,.04) 25px,rgba(0,0,0,.04) 27px),
+        radial-gradient(ellipse at 40% 30%,#1c1410 0%,#0a0808 70%);
+    }
+    body::after {
+      content:''; position:fixed; inset:0; z-index:999; pointer-events:none;
+      background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='250'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.78' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='250' height='250' filter='url(%23g)' opacity='0.045'/%3E%3C/svg%3E");
+      mix-blend-mode:overlay;
+    }
+
+    canvas#bg { position:fixed; inset:0; z-index:1; pointer-events:none; width:100%; height:100%; }
+
+    /* ══ candle flicker overlay ══ */
+    #candle-light {
+      position: fixed; inset: 0; z-index: 2; pointer-events: none;
+      background: radial-gradient(ellipse 55% 60% at 50% 45%,
+        rgba(255,180,60,0.055) 0%, rgba(200,120,30,0.025) 40%, transparent 70%);
+      animation: flicker 3.5s ease-in-out infinite;
+    }
+    @keyframes flicker {
+      0%,100% { opacity: 1;    transform: scale(1)     translateY(0); }
+      20%      { opacity: 0.85; transform: scale(1.015) translateY(-1px); }
+      45%      { opacity: 1.0;  transform: scale(0.99)  translateY(1px); }
+      60%      { opacity: 0.9;  transform: scale(1.02)  translateY(-1px); }
+      80%      { opacity: 0.95; transform: scale(1)     translateY(0); }
+    }
+
+    .site { position: relative; z-index: 3; }
+
+    /* ══════════════ NAV ══════════════ */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 600;
+      background: rgba(8,6,5,0.95);
+      border-bottom: 1px solid rgba(160,124,58,0.2);
+      backdrop-filter: blur(14px);
+      animation: navDrop .8s cubic-bezier(.22,.61,.36,1) both;
+    }
+    @keyframes navDrop { from{transform:translateY(-100%)} to{transform:translateY(0)} }
+
+    .nav-inner {
+      max-width: 1060px; margin: 0 auto; padding: 0 2rem;
+      display: flex; align-items: stretch; justify-content: space-between;
+      height: 52px;
+    }
+    .nav-brand { display:flex; flex-direction:column; justify-content:center; }
+    .nav-brand-en {
+      font-family:'Playfair Display',serif; font-style:italic;
+      font-size:1rem; color:var(--page2); line-height:1;
+    }
+    .nav-brand-sub {
+      font-family:'Cormorant Unicase',serif; font-size:.58rem;
+      letter-spacing:.28em; color:var(--gold2); margin-top:2px;
+    }
+    .nav-tabs { display:flex; align-items:stretch; }
+    .nav-tab {
+      display:flex; align-items:center; padding:0 1.3rem;
+      font-family:'Cormorant Unicase',serif; font-size:.72rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:var(--faded); text-decoration:none;
+      border-left:1px solid rgba(160,124,58,.1);
+      transition:color .25s,background .25s; position:relative;
+    }
+    .nav-tab::after {
+      content:''; position:absolute; bottom:0; left:0; right:0; height:2px;
+      background:var(--wine2); transform:scaleX(0); transition:transform .3s;
+    }
+    .nav-tab:hover { color:var(--page); background:rgba(160,124,58,.05); }
+    .nav-tab:hover::after { transform:scaleX(1); }
+    .nav-burger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; align-self:center; }
+    .nav-burger span { display:block; width:22px; height:1px; background:var(--faded); }
+
+    /* ══════════════ PAGE ENTRANCE ══════════════ */
+    /* Pages drop onto the desk one by one */
+    .spread-wrap {
+      display:flex; justify-content:center;
+      padding: 2.5rem 1rem;
+    }
+    .spread-wrap:first-of-type { padding-top: calc(52px + 3.5rem); }
+
+    .ledger-page {
+      width: min(1000px,96vw);
+      background: var(--page);
+      border-radius: 2px;
+      position: relative;
+      box-shadow:
+        0 0 0 1px rgba(100,75,30,.3),
+        0 2px 0 1px rgba(0,0,0,.5),
+        0 10px 50px rgba(0,0,0,.7),
+        inset 0 0 80px rgba(120,90,30,.07);
+      padding: 4rem 4.5rem 5rem;
+      background-image:
+        repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(120,90,30,.07) 26px,rgba(120,90,30,.07) 27px);
+      /* default hidden for drop animation */
+      opacity: 0;
+      transform: translateY(-40px) rotate(-0.8deg);
+      transform-origin: 50% 0%;
+    }
+    /* page lands with slight bounce */
+    .ledger-page.landed {
+      animation: pageDrop .9s cubic-bezier(.22,.61,.36,1) forwards;
+    }
+    @keyframes pageDrop {
+      0%   { opacity:0; transform:translateY(-50px) rotate(-1.2deg); }
+      60%  { opacity:1; transform:translateY(6px) rotate(0.3deg); }
+      80%  { transform:translateY(-3px) rotate(-0.1deg); }
+      100% { opacity:1; transform:translateY(0) rotate(0deg); }
+    }
+
+    /* spine + inner border */
+    .ledger-page::before {
+      content:''; position:absolute; inset:0;
+      background:
+        linear-gradient(to right,rgba(80,50,10,.2) 0%,transparent 7%),
+        radial-gradient(ellipse at 0% 0%,rgba(80,50,10,.15) 0%,transparent 35%),
+        radial-gradient(ellipse at 100% 100%,rgba(80,50,10,.12) 0%,transparent 35%);
+      border-radius:2px; pointer-events:none; z-index:0;
+    }
+    .ledger-page::after {
+      content:''; position:absolute; inset:8px;
+      border:1px solid rgba(120,90,30,.2);
+      border-radius:1px; pointer-events:none; z-index:0;
+    }
+    .page-content { position:relative; z-index:1; }
+
+    /* ══ candle shimmer on page surface ══ */
+    .ledger-page .page-sheen {
+      position:absolute; inset:0; border-radius:2px;
+      background: radial-gradient(ellipse 60% 50% at 65% 30%,
+        rgba(255,200,80,.06) 0%, transparent 65%);
+      pointer-events:none; z-index:0;
+      animation: sheen 4s ease-in-out infinite;
+    }
+    @keyframes sheen {
+      0%,100% { opacity:.6; transform:translate(0,0); }
+      33%      { opacity:1;  transform:translate(4px,-3px); }
+      66%      { opacity:.7; transform:translate(-3px,2px); }
+    }
+
+    /* ══════════════ BOOKSHELF DIVIDER ══════════════ */
+    .bookshelf-wrap {
+      position: relative; z-index: 5;
+      height: 90px;
+      display: flex; align-items: flex-end;
+      gap: 2px; padding: 0 2vw;
+      overflow: hidden;
+      /* 本棚の底をフェードアウトさせてAboutに溶け込ませる */
+      -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+      /* カードの横幅に揃える & 上部に隙間を作る */
+      width: min(1000px, 96vw);
+      margin: 4rem auto 0;
+    }
+    /* 本の揺れアニメーション */
+    @keyframes bookSway {
+      0%, 100% { transform: translateY(0); }
+      50%       { transform: translateY(-6px); }
+    }
+    /* 個別の本（シルエット） */
+    .shelf-book {
+      flex-shrink: 0;
+      border-radius: 1px 1px 0 0;
+      animation: bookSway 4s ease-in-out infinite;
+    }
+
+    /* ══════════════ SCROLL INDICATOR ══════════════ */
+    .scroll-indicator {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.8rem;
+      margin: 3.5rem 0 5.5rem; /* 隙間をさらに広げる */
+      position: relative;
+      z-index: 5;
+    }
+    .si-text {
+      font-family: 'Cormorant Unicase', serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.3em;
+      color: var(--gold2);
+      text-transform: uppercase;
+      opacity: 0.8;
+    }
+    .si-line {
+      width: 1px;
+      height: 45px;
+      background: linear-gradient(to bottom, var(--gold2), transparent);
+      animation: scrollDrop 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+      transform-origin: top;
+    }
+    @keyframes scrollDrop {
+      0% { transform: scaleY(0); opacity: 0; }
+      40% { transform: scaleY(1); opacity: 1; }
+      80%, 100% { transform: scaleY(1) translateY(15px); opacity: 0; }
+    }
+
+    /* ══════════════ CHAPTER HEAD ══════════════ */
+    .ch-head { margin-bottom:3rem; }
+    .ch-label {
+      font-family:'Caveat',cursive; font-size:.88rem;
+      color:var(--faded); display:block; margin-bottom:.2rem;
+    }
+    .ch-title {
+      font-family:'Playfair Display',serif; font-weight:700;
+      font-size:clamp(1.4rem,3vw,2.1rem); color:var(--ink); line-height:1.1;
+      display:flex; align-items:center; gap:1rem;
+    }
+    .ch-title::before,.ch-title::after {
+      content:''; flex:0 0 auto; height:1px; background:rgba(160,124,58,.35);
+    }
+    .ch-title::before { width:18px; }
+    .ch-title::after  { width:30px; }
+    .ch-roman { display:none; }
+    .ch-title-jp {
+      font-family:'Cormorant Unicase',serif; font-size:.7rem;
+      letter-spacing:.28em; color:var(--ink3); display:block; margin-top:.3rem;
+    }
+
+    /* ══════════════ HERO ══════════════ */
+
+    /* Hero page: dark sepia — overrides the global beige */
+    .ledger-page.hero-page {
+      background-color: #1e1710;
+      background-image:
+        repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(255,255,255,.018) 26px,rgba(255,255,255,.018) 27px);
+      box-shadow:
+        0 0 0 1px rgba(160,124,58,.22),
+        0 2px 0 1px rgba(0,0,0,.7),
+        0 10px 50px rgba(0,0,0,.85),
+        inset 0 0 100px rgba(0,0,0,.45);
+    }
+    .ledger-page.hero-page::before {
+      background:
+        linear-gradient(to right,rgba(0,0,0,.4) 0%,transparent 7%),
+        radial-gradient(ellipse at 0% 0%,rgba(0,0,0,.25) 0%,transparent 35%),
+        radial-gradient(ellipse at 100% 100%,rgba(0,0,0,.2) 0%,transparent 35%);
+    }
+    .ledger-page.hero-page::after {
+      border-color: rgba(160,124,58,.13);
+    }
+    /* text colours on dark hero page */
+    .hero-page .h-eyebrow       { color:#8a6c28; }
+    .hero-page .h-eyebrow::before { background:#8a6c28; }
+    .hero-page .h-name-en       { color:#d4c4a0; }
+    .hero-page .h-name-jp       { color:#8a7a5a; }
+    .hero-page .h-rule          { background:linear-gradient(to right,rgba(160,124,58,.5),transparent); }
+    .hero-page .h-copy          { color:#b8a882; }
+    .hero-page .h-seal          { color:rgba(158,40,56,.7); border-color:rgba(158,40,56,.6); outline-color:rgba(158,40,56,.25); }
+
+    .hero-spread {
+      display:grid; grid-template-columns:1fr 420px;
+      gap:4rem; align-items:end; min-height:480px;
+    }
+    .hero-left { padding-bottom:2rem; }
+
+    .h-eyebrow {
+      font-family:'Cormorant Unicase',serif; font-size:.68rem;
+      letter-spacing:.38em; color:var(--gold2); text-transform:uppercase;
+      display:flex; align-items:center; gap:.8rem; margin-bottom:1rem;
+    }
+    .h-eyebrow::before { content:''; width:24px; height:1px; background:var(--gold2); }
+
+    /* ink-write animation on hero name */
+    .h-name-en {
+      font-family:'Playfair Display',serif; font-weight:900; font-style:italic;
+      font-size:clamp(3rem,6.5vw,5.8rem); color:var(--ink); line-height:.9;
+      letter-spacing:-.01em;
+      /* clip-path reveal — ink drawing effect */
+      clip-path: inset(0 100% 0 0);
+      transition: clip-path 1.4s cubic-bezier(.4,0,.2,1);
+    }
+    .h-name-en.ink-in { clip-path: inset(0 0% 0 0); }
+
+    .h-name-jp {
+      font-family:'Cormorant Unicase',serif; font-weight:300;
+      font-size:clamp(1rem,2vw,1.25rem); color:var(--ink3);
+      letter-spacing:.32em; margin-top:.5rem;
+      opacity:0; transition:opacity .8s ease .8s;
+    }
+    .h-name-jp.ink-in { opacity:1; }
+
+    .h-rule {
+      width:100%; height:1px; margin:1.5rem 0;
+      background:linear-gradient(to right,rgba(160,124,58,.4),transparent);
+      transform:scaleX(0); transform-origin:left;
+      transition:transform .9s cubic-bezier(.4,0,.2,1) .6s;
+    }
+    .h-rule.ink-in { transform:scaleX(1); }
+
+    .h-copy {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.04rem; line-height:2.2; color:var(--ink2); max-width:320px;
+      opacity:0; transform:translateY(10px);
+      transition:opacity .8s ease 1.1s, transform .8s ease 1.1s;
+    }
+    .h-copy.ink-in { opacity:1; transform:translateY(0); }
+
+    .h-seal {
+      display:inline-flex; align-items:center; justify-content:center; flex-direction:column;
+      width:72px; height:72px; border-radius:50%;
+      border:1.5px solid rgba(122,30,42,.55);
+      outline:1px solid rgba(122,30,42,.2); outline-offset:3px;
+      transform:rotate(-10deg) scale(0); margin-top:1.5rem;
+      font-family:'Cormorant Unicase',serif; font-size:.48rem;
+      letter-spacing:.1em; text-align:center; line-height:1.7;
+      color:rgba(122,30,42,.6); text-transform:uppercase;
+      transition:transform .5s cubic-bezier(.34,1.56,.64,1) 1.6s;
+    }
+    .h-seal.ink-in { transform:rotate(-10deg) scale(1); }
+
+    .hero-chara { display:flex; align-items:flex-end; justify-content:center; padding-top:1rem; }
+    .hero-chara img {
+      width:100%; max-width:420px; object-fit:contain;
+      filter:sepia(.15) drop-shadow(0 8px 28px rgba(0,0,0,.5));
+      animation:breathe 8s ease-in-out infinite;
+    }
+    @keyframes breathe { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-7px)} }
+
+    /* ══════════════ PROFILE ══════════════ */
+    .profile-spread { display:grid; grid-template-columns:165px 1fr; gap:3.5rem; }
+    .photo-wrap { position:relative; padding-top:8px; }
+    .pin {
+      position:absolute; top:0; left:50%; transform:translateX(-50%);
+      width:10px; height:10px; border-radius:50%; z-index:5;
+      background:radial-gradient(circle at 35% 30%,#c04040,#6b1818);
+      box-shadow:0 1px 4px rgba(0,0,0,.6);
+    }
+    .photo-frame {
+      width:165px; aspect-ratio:3/4;
+      background:#1a1510;
+      border:1px solid rgba(120,90,30,.3);
+      display:flex; align-items:center; justify-content:center;
+      position:relative; box-shadow:3px 4px 16px rgba(0,0,0,.4);
+      padding: 12px 12px 26px 12px; /* 画像の周りに余白を作り写真風にする */
+    }
+    .photo-frame::before { content:''; position:absolute; inset:4px; border:1px solid rgba(120,90,30,.15); }
+    .photo-frame::after {
+      content:'B·S'; position:absolute; bottom:7px; right:9px;
+      font-family:'Cormorant Unicase',serif; font-size:.55rem;
+      letter-spacing:.18em; color:rgba(160,124,58,.25);
+    }
+    .photo-hint {
+      font-family:'Cormorant Unicase',serif; font-size:.6rem;
+      color:var(--faded); text-align:center; letter-spacing:.15em; line-height:2.2;
+    }
+    .photo-cap {
+      font-family:'Caveat',cursive; font-size:.82rem;
+      color:var(--faded); text-align:center; margin-top:.5rem;
+    }
+    .p-name-en {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:clamp(1.8rem,3.5vw,2.8rem); color:var(--ink); line-height:1.05;
+    }
+    .p-name-jp {
+      font-family:'Cormorant Unicase',serif; font-weight:300;
+      font-size:.92rem; color:var(--ink3); letter-spacing:.28em; margin-top:.15rem;
+    }
+    .ledger-tbl { width:100%; border-collapse:collapse; margin:1.2rem 0 1.6rem; }
+    .ledger-tbl tr { border-bottom:1px solid rgba(160,124,58,.12); }
+    .ledger-tbl tr:first-child { border-top:1px solid rgba(160,124,58,.18); }
+    .ledger-tbl td { padding:.65rem 0; font-size:.97rem; vertical-align:baseline; color:var(--ink2); }
+    .ledger-tbl td:first-child { font-family:'Caveat',cursive; font-size:.83rem; color:var(--faded); width:100px; }
+    .p-bio {
+      font-family:'EB Garamond',serif; font-style:italic;
+      font-size:1.02rem; line-height:2.2; color:var(--ink2);
+      border-top:1px solid rgba(160,124,58,.14); padding-top:1.2rem;
+    }
+    
+    .p-ref-sheet {
+      display: block; width: 100%; height: auto;
+      margin-top: 2.5rem;
+      border: 1px solid rgba(120,90,30,.2);
+      box-shadow: 2px 3px 10px rgba(0,0,0,.2);
+      cursor: zoom-in; /* クリックできることを示すカーソル */
+    }
+
+    /* ══════════════ SCHEDULE ══════════════ */
+    .sched-grid {
+      display:grid; grid-template-columns:repeat(4,1fr); gap:1.4rem;
+    }
+
+    /* 3D flip card */
+    .sched-card {
+      perspective: 600px;
+      cursor: default;
+    }
+    .sched-card-inner {
+      position:relative; width:100%;
+      transform-style: preserve-3d;
+      transition: transform .6s cubic-bezier(.4,0,.2,1);
+      transform: rotate(var(--r,0deg));
+    }
+    .sched-card:hover .sched-card-inner {
+      transform: rotateY(180deg);
+    }
+    .sched-front, .sched-back {
+      backface-visibility: hidden;
+      -webkit-backface-visibility: hidden;
+      background: var(--page-lt);
+      border: 1px solid rgba(120,90,30,.25);
+      padding: 1.4rem 1.2rem;
+      box-shadow: 2px 3px 10px rgba(0,0,0,.25);
+    }
+    .sched-back {
+      position: absolute; inset: 0;
+      transform: rotateY(180deg);
+      display:flex; flex-direction:column; align-items:center; justify-content:center;
+      background: var(--page2);
+      text-align:center;
+    }
+    .sched-back-day {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:2.8rem; color:rgba(122,30,42,.18); line-height:1;
+      position:absolute; bottom:.4rem; right:.7rem;
+    }
+    .sched-back-note {
+      font-family:'Caveat',cursive; font-size:.88rem; color:var(--faded); line-height:1.7;
+    }
+    .sched-card .pin { top:-7px; left:50%; }
+
+    .sched-card.note-card {
+      grid-column:1/-1; perspective:none;
+    }
+    .sched-card.note-card .sched-card-inner {
+      transform:none; transition:none;
+      background:transparent; border:none; box-shadow:none;
+    }
+    .sched-card.note-card:hover .sched-card-inner { transform:none; }
+
+    .sc-day {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:2rem; color:var(--ink); line-height:1; margin-bottom:.2rem;
+    }
+    .sc-time { font-family:'Caveat',cursive; font-size:.85rem; color:var(--faded); margin-bottom:.3rem; }
+    .sc-content { font-family:'EB Garamond',serif; font-size:.95rem; color:var(--ink2); }
+    .sc-off { font-family:'Caveat',cursive; font-size:.8rem; color:var(--faded); font-style:italic; }
+    .sched-note-text {
+      font-family:'Caveat',cursive; font-size:.9rem; color:var(--faded);
+      text-align:center; padding-top:.3rem;
+    }
+
+    /* ══════════════ GUIDELINES ══════════════ */
+    .guide-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.6rem; }
+
+    .guide-card {
+      background: var(--page-lt);
+      border: 1px solid rgba(120,90,30,.22);
+      padding: 1.4rem 1.4rem 1.5rem;
+      position: relative;
+      box-shadow: 2px 3px 10px rgba(0,0,0,.22);
+      transform: rotate(var(--r, 0deg));
+      transition: transform .3s;
+    }
+    .guide-card:hover { transform: rotate(0deg) translateY(-2px); }
+
+    .gc-stamp {
+      display:block; width:fit-content;
+      font-family:'Cormorant Unicase',serif; font-size:.62rem;
+      letter-spacing:.15em; text-transform:uppercase;
+      padding:.18rem .7rem; border:1.5px solid; border-radius:1px;
+      transform:rotate(-2.5deg); margin-bottom:.9rem;
+    }
+    .gc-stamp.ok  { color:#4a8a3a; border-color:rgba(74,138,58,.45); background:rgba(42,96,32,.06); }
+    .gc-stamp.ng  { color:#a04040; border-color:rgba(160,64,64,.45);  background:rgba(122,20,24,.06); }
+    .gc-stamp.ask { color:var(--gold3); border-color:rgba(192,152,80,.45); background:rgba(90,64,16,.06); }
+    .gc-title { font-family:'Playfair Display',serif; font-weight:700; font-size:1rem; color:var(--ink); margin-bottom:.8rem; }
+    .gc-list { list-style:none; display:flex; flex-direction:column; gap:.42rem; }
+    .gc-list li {
+      font-family:'EB Garamond',serif; font-size:.92rem;
+      color:var(--ink2); line-height:1.55; padding-left:.9rem; position:relative;
+    }
+    .gc-list li::before { content:'—'; position:absolute; left:0; color:var(--faded); font-size:.75rem; }
+    .guide-note {
+      grid-column:1/-1; margin-top:.2rem;
+      font-family:'Caveat',cursive; font-size:.9rem; color:var(--faded);
+      text-align:center; line-height:1.8;
+      border-top:1px dashed rgba(160,124,58,.2); padding-top:1rem;
+    }
+
+    /* ══════════════ LINKS ══════════════ */
+    .links-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.4rem; }
+    .ticket {
+      background:var(--page-lt);
+      border:1px solid rgba(120,90,30,.22);
+      display:flex; align-items:center; justify-content:space-between;
+      padding:1.4rem 1.6rem;
+      text-decoration:none; color:inherit;
+      position:relative; overflow:hidden;
+      box-shadow:2px 3px 8px rgba(0,0,0,.2);
+      transition:transform .25s, box-shadow .25s;
+    }
+    .ticket::before {
+      content:''; position:absolute; left:0; top:0; bottom:0;
+      width:3px; background:var(--wine);
+    }
+    .ticket::after {
+      content:''; position:absolute; right:46px; top:0; bottom:0; width:1px;
+      background:repeating-linear-gradient(to bottom,rgba(120,90,30,.3) 0,rgba(120,90,30,.3) 4px,transparent 4px,transparent 8px);
+    }
+    /* shimmer sweep on hover */
+    .ticket-sheen {
+      position:absolute; inset:0; pointer-events:none;
+      background:linear-gradient(105deg,transparent 40%,rgba(255,220,120,.18) 50%,transparent 60%);
+      transform:translateX(-100%);
+      transition:transform .5s ease;
+    }
+    .ticket:hover { transform:translateY(-2px); box-shadow:4px 6px 18px rgba(0,0,0,.35); }
+    .ticket:hover .ticket-sheen { transform:translateX(100%); }
+    .t-name { font-family:'Playfair Display',serif; font-style:italic; font-size:1.08rem; color:var(--ink); }
+    .t-desc { font-family:'Caveat',cursive; font-size:.8rem; color:var(--faded); display:block; margin-top:.1rem; }
+    .t-arr { font-size:.9rem; color:var(--wine2); opacity:.55; transition:opacity .25s,transform .25s; padding-left:.8rem; }
+    .ticket:hover .t-arr { opacity:1; transform:translateX(3px); }
+
+    /* ══════════════ FOOTER ══════════════ */
+    .footer-pg {
+      width:min(1000px,96vw); margin:0 auto 2.5rem;
+      background:var(--page2); border-radius:2px;
+      border:1px solid rgba(100,75,30,.25);
+      box-shadow:0 4px 20px rgba(0,0,0,.5);
+      padding:1.8rem 3.5rem;
+      display:flex; align-items:center; justify-content:space-between;
+      position:relative; z-index:2;
+    }
+    .footer-pg::before {
+      content:''; position:absolute; top:0; bottom:0; left:0; width:14px;
+      background:linear-gradient(to right,rgba(80,50,10,.18),transparent);
+      border-radius:2px 0 0 2px;
+    }
+    .f-brand { font-family:'Playfair Display',serif; font-style:italic; font-size:1.3rem; color:var(--ink); display:block; }
+    .f-sub   { font-family:'Cormorant Unicase',serif; font-size:.58rem; letter-spacing:.28em; color:var(--faded); margin-top:2px; }
+    .f-right { font-family:'Caveat',cursive; font-size:.88rem; color:var(--faded); text-align:right; line-height:1.8; }
+
+    /* ══════════════ SCROLL REVEAL ══════════════ */
+    .rv { opacity:0; transform:translateY(18px); transition:opacity .75s ease,transform .75s ease; }
+    .rv.in { opacity:1; transform:translateY(0); }
+    .rv.d1 { transition-delay:.1s; }
+    .rv.d2 { transition-delay:.22s; }
+    .rv.d3 { transition-delay:.36s; }
+
+    /* ══════════════ RESPONSIVE ══════════════ */
+    @media(max-width:760px){
+      .ledger-page { padding:2.5rem 1.8rem; }
+      .hero-spread  { grid-template-columns:1fr; }
+      .hero-chara img { max-width:60vw; margin:0 auto; }
+      .profile-spread { grid-template-columns:1fr; }
+      .photo-wrap { display:flex; flex-direction:column; align-items:center; }
+      .sched-grid { grid-template-columns:repeat(2,1fr); }
+      .guide-grid  { grid-template-columns:1fr; }
+      .links-grid  { grid-template-columns:1fr; }
+      .nav-tabs    { display:none; }
+      .nav-burger  { display:flex; }
+      .footer-pg   { flex-direction:column; gap:1rem; padding:1.8rem; }
+      .f-right     { text-align:left; }
+    }
+
+    .m-nav { display:none; position:fixed; inset:0; z-index:700; background:rgba(8,6,5,.97); flex-direction:column; align-items:center; justify-content:center; gap:2.5rem; }
+    .m-nav.open { display:flex; }
+    .m-nav a { font-family:'Playfair Display',serif; font-style:italic; font-size:1.8rem; color:var(--page); text-decoration:none; }
+    .m-nav-close { position:absolute; top:1.2rem; right:1.5rem; background:none; border:none; font-size:1.4rem; color:var(--faded); cursor:pointer; }
+
+    /* ══════════════ MODAL (Image Zoom) ══════════════ */
+    .img-modal {
+      display: none;
+      position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%;
+      background-color: rgba(8, 6, 5, 0.9);
+      backdrop-filter: blur(5px);
+      opacity: 0; transition: opacity 0.3s ease;
+      align-items: center; justify-content: center;
+    }
+    .img-modal.show {
+      display: flex;
+      opacity: 1;
+    }
+    .modal-content {
+      max-width: 90%; max-height: 90vh;
+      object-fit: contain;
+      border: 1px solid rgba(160, 124, 58, 0.4);
+      box-shadow: 0 10px 40px rgba(0, 0, 0, 0.8);
+      transform: scale(0.95); transition: transform 0.3s ease;
+      /* モーダル内画像もドラッグ・選択無効化 */
+      pointer-events: auto; /* モーダル内はクリック可能にするため必要 */
+      -webkit-user-drag: none;
+      user-select: none;
+    }
+    .img-modal.show .modal-content {
+      transform: scale(1);
+    }
+    .modal-close {
+      position: absolute; top: 20px; right: 30px;
+      color: var(--faded); font-size: 2rem; font-family: sans-serif;
+      font-weight: bold; cursor: pointer; transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--page); }
+
+    /* ══════════════ BGM CONTROL ══════════════ */
+    .bgm-btn {
+      position: fixed; bottom: 24px; right: 24px; z-index: 800;
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(8,6,5,0.85);
+      border: 1px solid rgba(160,124,58,0.3);
+      color: var(--gold2);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; backdrop-filter: blur(4px);
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+    }
+    .bgm-btn:hover {
+      background: rgba(160,124,58,0.1);
+      color: var(--gold);
+      border-color: rgba(160,124,58,0.6);
+    }
+    .bgm-btn.playing {
+      color: var(--page);
+      border-color: rgba(160,124,58,0.8);
+      box-shadow: 0 0 15px rgba(160,124,58,0.2);
+    }
+  </style>
+</head>
+<body>
+
+<div id="entranceOverlay" style="position:fixed; inset:0; z-index:9999; background:var(--void); display:flex; align-items:center; justify-content:center; flex-direction:column; gap:2.5rem; transition: opacity 1.2s ease;">
+  <div style="text-align:center; color:var(--page); font-family:'Playfair Display',serif; padding: 0 2rem;">
+    <p style="font-size:0.75rem; letter-spacing:0.4em; color:var(--gold2); margin-bottom:1.5rem; text-transform:uppercase;">Welcome to</p>
+    <p style="font-size:2rem; font-style:italic; letter-spacing:0.1em; color:var(--page2);">Bibliotheca Somnii</p>
+    <div style="width:40px; height:1px; background:var(--gold2); margin:2rem auto;"></div>
+    <p style="font-family:'EB Garamond',serif; font-size:0.95rem; color:var(--faded); line-height:1.8;">
+      このサイトではBGMが流れます。音量にご注意ください。<br>
+      右下のボタンでミュートも可能です。
+    </p>
+  </div>
+  
+  <style>
+    /* アニメーション定義 */
+    @keyframes pulseBtn {
+      0% { box-shadow: 0 0 0 0 rgba(160, 124, 58, 0); border-color: rgba(160, 124, 58, 0.3); }
+      50% { box-shadow: 0 0 15px 1px rgba(160, 124, 58, 0.15); border-color: rgba(160, 124, 58, 0.6); }
+      100% { box-shadow: 0 0 0 0 rgba(160, 124, 58, 0); border-color: rgba(160, 124, 58, 0.3); }
+    }
+    .enter-button {
+      background: rgba(160, 124, 58, 0.05);
+      border: 1px solid rgba(160, 124, 58, 0.4);
+      color: var(--page);
+      padding: 1rem 3.5rem;
+      font-family: 'Cormorant Unicase', serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.3em;
+      cursor: pointer;
+      transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+      animation: pulseBtn 3s infinite;
+      outline: none;
+    }
+    .enter-button:hover {
+      background: rgba(160, 124, 58, 0.12);
+      border-color: var(--gold);
+      letter-spacing: 0.5em;
+      padding-left: 3.8rem;
+      padding-right: 3.2rem;
+    }
+  </style>
+
+  <button id="enterBtn" class="enter-button">
+    ENTER
+  </button>
+</div>
+
+<canvas id="bg"></canvas>
+<div id="candle-light"></div>
+<div class="site">
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-brand">
+      <span class="nav-brand-en">Lienebelle</span>
+      <span class="nav-brand-sub">Bibliotheca Somnii</span>
+    </div>
+    <div class="nav-tabs">
+      <a href="#profile"    class="nav-tab">Profile</a>
+      <a href="#schedule"   class="nav-tab">Schedule</a>
+      <a href="#guidelines" class="nav-tab">Guidelines</a>
+      <a href="#links"      class="nav-tab">Links</a>
+    </div>
+    <div class="nav-burger" id="burger"><span></span><span></span><span></span></div>
+  </div>
+</nav>
+<div class="m-nav" id="mNav">
+  <button class="m-nav-close" id="mClose">✕</button>
+  <a href="#profile"    onclick="cNav()">Profile</a>
+  <a href="#schedule"   onclick="cNav()">Schedule</a>
+  <a href="#guidelines" onclick="cNav()">Guidelines</a>
+  <a href="#links"      onclick="cNav()">Links</a>
+</div>
+
+<div class="spread-wrap">
+  <div class="ledger-page hero-page" id="heroPage">
+    <div class="page-sheen"></div>
+    <div class="page-content hero-spread">
+      <div class="hero-left">
+        <p class="h-eyebrow">Bibliothécaire des Rêves</p>
+        <h1>
+          <div class="h-name-en" id="heroName">Lienebelle</div>
+          <div class="h-name-jp" id="heroNameJp">リーネベル</div>
+        </h1>
+        <div class="h-rule" id="heroRule"></div>
+        <p class="h-copy" id="heroCopy">
+          夢を紡ぐ司書の悪魔。<br>
+          眠りにつくあなたへ、今宵も楽しい夢を。
+        </p>
+        <div class="h-seal" id="heroSeal" style="font-size: 0.36rem;">Bibliothécaire<br>des Rêves<br>―<br>Lienebelle</div>
+      </div>
+      <div class="hero-chara">
+        <img src="Lienebelle.png" alt="Lienebelle リーネベル" oncontextmenu="return false;" draggable="false">
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="bookshelf-wrap" id="bookshelfWrap"></div>
+
+<div class="scroll-indicator">
+  <span class="si-text">Scroll</span>
+  <div class="si-line"></div>
+</div>
+
+<script>
+(function(){
+  const wrap = document.getElementById('bookshelfWrap');
+  const bc = ['#1f1b20','#26191c','#191e1a','#1d1c1e','#261e16','#201b1d','#151418','#21171a'];
+  for (let i = 0; i < 200; i++) {
+    const b = document.createElement('div');
+    b.className = 'shelf-book';
+    b.style.height = (38 + Math.random() * 52) + 'px';
+    b.style.width  = (8 + Math.random() * 13) + 'px';
+    b.style.background = bc[Math.floor(Math.random() * bc.length)];
+    b.style.animationDelay = (Math.random() * 5) + 's';
+    b.style.animationDuration = (4 + Math.random() * 4) + 's';
+    wrap.appendChild(b);
+  }
+})();
+</script>
+
+<div class="spread-wrap" id="profile">
+  <div class="ledger-page">
+    <div class="page-sheen"></div>
+    <div class="page-content">
+      <div class="ch-head rv">
+        <span class="ch-label">about the librarian</span>
+        <div class="ch-title">About</div>
+        <span class="ch-title-jp">司書について</span>
+      </div>
+      <div class="profile-spread">
+        <div class="photo-wrap rv">
+          <div class="pin"></div>
+          <div class="photo-frame">
+            <img src="icon_photo.png" alt="icon" style="width:100%; height:100%; object-fit:cover;" oncontextmenu="return false;" draggable="false">
+          </div>
+          <p class="photo-cap">Lienebelle</p>
+        </div>
+        <div class="rv d1">
+          <div class="p-name-en">Lienebelle</div>
+          <div class="p-name-jp">リーネベル</div>
+          <table class="ledger-tbl">
+            <tbody>
+              <tr><td>Species</td><td>(自称)悪魔</td></tr>
+              <tr><td>Fan Name</td><td>お客様</td></tr>
+              <tr><td>Fan Mark</td><td>✥</td></tr>
+              <tr><td>Creator</td><td><a href="https://x.com/__y_o_u_k_a__" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">ようか</a> / <a href="https://x.com/torutl101" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">とる</a></td></tr>
+              <tr>
+                <td>Stream Tag</td>
+                <td>
+                  配信への感想・切り抜きなど：<a href="https://x.com/hashtag/Li_ra" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_ra</a>
+                </td>
+              </tr>
+              <tr>
+                <td>Fanart Tag</td>
+                <td>
+                  創作物全般：<a href="https://x.com/hashtag/Li_cre" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_cre</a><br>
+                  グッズ等の写真：<a href="https://x.com/hashtag/Li_Ph" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_Ph</a><br>
+                  ゾーニングが必要な創作物：<a href="https://x.com/hashtag/sm17150" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#sm17150</a><br>
+                  <span style="font-size:0.75rem; color:var(--faded);">※ #sm17150での反応は控えさせて頂いております</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="p-bio">
+            「おやすみなさい、リーネベルでございます」<br><br>
+            夢の世界で、生き物たちの夢を紡ぐ司書の悪魔。<br>膝に乗せているのは「姉」らしい……。<br>
+            かつては恐ろしい悪夢を与えていたが、<br>深刻な人手不足により「楽しい夢」担当へ配置転換。<br>職務として人間の娯楽を学んだ結果、すっかりオタクの沼へと落ちてしまった。<br><br>
+            夢の世界で社畜として生きる傍ら、己の愛するものを布教すべく<br>そして人間たちにひとときの享楽を与えるべく現世へ向けて配信中。
+          </p>
+          <img src="三面図.png" alt="三面図" class="p-ref-sheet rv d2" oncontextmenu="return false;" draggable="false">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spread-wrap" id="schedule">
+  <div class="ledger-page">
+    <div class="page-sheen"></div>
+    <div class="page-content">
+      <div class="ch-head rv">
+        <span class="ch-label">streaming schedule</span>
+        <div class="ch-title">Schedule</div>
+        <span class="ch-title-jp">配信予定</span>
+      </div>
+      <div class="sched-grid" id="schedGrid">
+        </div>
+    </div>
+  </div>
+</div>
+
+<div class="spread-wrap" id="guidelines">
+  <div class="ledger-page">
+    <div class="page-sheen"></div>
+    <div class="page-content">
+      <div class="ch-head rv">
+        <span class="ch-label">fan creation guidelines</span>
+        <div class="ch-title">Guidelines</div>
+        <span class="ch-title-jp">二次創作について</span>
+      </div>
+      <div class="guide-grid">
+
+        <div class="guide-card rv d1" style="--r:-0.5deg">
+          <div class="pin"></div>
+          <span class="gc-stamp ok">✓ OK</span>
+          <div class="gc-title">歓迎・許可していること</div>
+          <ul class="gc-list">
+            <li>非営利目的のファン活動全般（イラスト・切り抜き等）</li>
+            <li>プラットフォームの正規機能を利用した収益化</li>
+            <li>Skeb等での個人間の有償依頼（コミッション）</li>
+          </ul>
+        </div>
+
+        <div class="guide-card rv d2" style="--r:0.4deg">
+          <div class="pin"></div>
+          <span class="gc-stamp ask">! RULE</span>
+          <div class="gc-title">公開時のお願い</div>
+          <ul class="gc-list">
+            <li>R-18・グロ表現は適切なゾーニングを行うこと</li>
+            <li>切り抜き動画等には元動画のURLを明記すること</li>
+            <li>AI生成作品はAI利用の旨を明記すること</li>
+          </ul>
+        </div>
+
+        <div class="guide-card rv d1" style="--r:-0.4deg">
+          <div class="pin"></div>
+          <span class="gc-stamp ng">✕ NG</span>
+          <div class="gc-title">禁止事項</div>
+          <ul class="gc-list">
+            <li>私的利用を超える営利目的でのグッズ制作・販売</li>
+            <li>公式と誤認される表現、公序良俗に反する表現</li>
+            <li>公式素材の再配布・コラージュ等のデータ盗用</li>
+            <li>当館の作品をAI学習のデータとして利用すること</li>
+          </ul>
+        </div>
+
+        <p class="guide-note rv d3">
+          画像の無断転載・使用・加工はご遠慮いただけますようお願いいたします。<br>
+          <span style="font-size:0.75rem;">Unauthorized use, reproduction, or modification of the images is prohibited.</span><br>
+          ©Lienebelle All Rights Reserved.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spread-wrap" id="links">
+  <div class="ledger-page">
+    <div class="page-sheen"></div>
+    <div class="page-content">
+      <div class="ch-head rv">
+        <span class="ch-label">find me at</span>
+        <div class="ch-title">Links</div>
+        <span class="ch-title-jp">リンク集</span>
+      </div>
+      <div class="links-grid rv d1">
+        <a href="https://www.youtube.com/channel/UCoTlUnbIeu2owBT6_CeZyUA" target="_blank" class="ticket">
+          <div class="ticket-sheen"></div>
+          <div><span class="t-name">YouTube</span><span class="t-desc">Video &amp; Live Stream</span></div>
+          <span class="t-arr">→</span>
+        </a>
+        <a href="https://x.com/lnbl_" target="_blank" class="ticket">
+          <div class="ticket-sheen"></div>
+          <div><span class="t-name">X / Twitter</span><span class="t-desc">Updates &amp; Daily Posts</span></div>
+          <span class="t-arr">→</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="spread-wrap">
+  <div class="footer-pg rv">
+    <div>
+      <span class="f-brand">Lienebelle</span>
+      <span class="f-sub">Bibliotheca Somnii — 夢書館</span>
+    </div>
+    <div class="f-right">
+      BGM : <a href="https://nagumorizu.com/tos/" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">なぐもりずの音楽室</a><br>
+      All dreams are safely kept here.<br>© Lienebelle
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div id="imgModal" class="img-modal">
+  <span class="modal-close" id="modalClose">✕</span>
+  <img class="modal-content" id="modalImg" oncontextmenu="return false;" draggable="false">
+</div>
+
+<audio id="bgmAudio" src="Träume.mp3" loop></audio>
+
+<button id="bgmBtn" class="bgm-btn" title="Play/Pause BGM">
+  <svg id="iconMute" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <line x1="23" y1="9" x2="17" y2="15"></line>
+    <line x1="17" y1="9" x2="23" y2="15"></line>
+  </svg>
+  <svg id="iconPlay" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+    <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+    <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+  </svg>
+</button>
+
+<script>
+/* ══ CANVAS: magic circle + amber dust motes ══ */
+const cv=document.getElementById('bg'),cx=cv.getContext('2d');
+let W,H; const rsz=()=>{W=cv.width=innerWidth;H=cv.height=innerHeight;}; rsz(); addEventListener('resize',rsz);
+
+function drawMagic(t){
+  const ox=W/2,oy=H*.5,R=Math.min(W,H)*.22;
+  cx.save(); cx.translate(ox,oy);
+  [{r:R,spd:.002,n:20,c:'rgba(80,50,15,'},{r:R*.66,spd:-.004,n:14,c:'rgba(107,24,40,'},{r:R*.4,spd:.006,n:10,c:'rgba(80,50,15,'}].forEach(ring=>{
+    cx.save(); cx.rotate(t*ring.spd);
+    const d=(2*Math.PI*ring.r)/(ring.n*2);
+    cx.setLineDash([d*.45,d*1.55]); cx.beginPath(); cx.arc(0,0,ring.r,0,Math.PI*2);
+    cx.strokeStyle=ring.c+'0.1)'; cx.lineWidth=.5; cx.stroke(); cx.setLineDash([]);
+    for(let i=0;i<ring.n;i++){
+      const a=(i/ring.n)*Math.PI*2,len=i%4===0?6:2.5;
+      cx.beginPath(); cx.moveTo(Math.cos(a)*(ring.r-2),Math.sin(a)*(ring.r-2)); cx.lineTo(Math.cos(a)*(ring.r+len),Math.sin(a)*(ring.r+len));
+      cx.strokeStyle=ring.c+(i%4===0?'0.18)':'0.07)'); cx.lineWidth=i%4===0?.6:.3; cx.stroke();
+    }
+    cx.restore();
+  });
+  cx.save(); cx.rotate(t*.0005);
+  cx.beginPath();
+  for(let p=0;p<6;p++){
+    const a1=(p/6)*Math.PI*2-Math.PI/2,a2=((p+.5)/6)*Math.PI*2-Math.PI/2,rO=R*.4,rI=R*.2;
+    p===0?cx.moveTo(Math.cos(a1)*rO,Math.sin(a1)*rO):cx.lineTo(Math.cos(a1)*rO,Math.sin(a1)*rO);
+    cx.lineTo(Math.cos(a2)*rI,Math.sin(a2)*rI);
+  }
+  cx.closePath(); cx.strokeStyle='rgba(80,50,15,.08)'; cx.lineWidth=.5; cx.stroke(); cx.restore();
+  cx.restore();
+}
+
+const motes=Array.from({length:45},()=>({
+  x:Math.random(),y:Math.random(),
+  vx:(Math.random()-.5)*.00008,vy:-(Math.random()*.00015+.00006),
+  r:Math.random()*.9+.3,life:Math.random(),max:Math.random()*.7+.5,
+  warm:Math.random()>.4
+}));
+function drawMotes(){
+  motes.forEach(m=>{
+    m.life+=1/(60*18);
+    if(m.life>m.max){m.life=0;m.x=Math.random();m.y=1.05;} 
+    
+    m.x += m.vx + Math.sin(t * 0.015 + m.r * 10) * 0.00012;
+    m.y += m.vy;
+
+    const p=m.life/m.max,a=(p<.25?p/.25:p>.75?1-(p-.75)/.25:1)*(m.warm?.15:.1);
+    const px=m.x*W,py=m.y*H,g=cx.createRadialGradient(px,py,0,px,py,m.r*8); // 粒子の光を少し大きく
+    const col=m.warm?'210,180,100':'240,230,200'; // わずかに白っぽい光を混ぜて幻想的に
+    g.addColorStop(0,`rgba(${col},${a})`); g.addColorStop(1,`rgba(${col},0)`);
+    cx.beginPath(); cx.arc(px,py,m.r*8,0,Math.PI*2); cx.fillStyle=g; cx.fill();
+  });
+}
+
+let t=0; (function loop(){cx.clearRect(0,0,W,H);drawMagic(t);drawMotes();t++;requestAnimationFrame(loop);})();
+
+/* ══ PAGE DROP: stagger each ledger-page on scroll ══ */
+const pages = document.querySelectorAll('.ledger-page');
+const pageObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if(e.isIntersecting && !e.target.classList.contains('landed')){
+      e.target.classList.add('landed');
+    }
+  });
+}, { threshold: 0.05 });
+pages.forEach(p => pageObs.observe(p));
+
+/* ══ INK WRITE: hero text on first page land ══ */
+const heroPage = document.getElementById('heroPage');
+const heroObs = new IntersectionObserver((entries) => {
+  if(entries[0].isIntersecting){
+    // slight delay after page drop
+    setTimeout(()=>{
+      ['heroName','heroNameJp','heroRule','heroCopy','heroSeal'].forEach(id=>{
+        document.getElementById(id)?.classList.add('ink-in');
+      });
+    }, 600);
+    heroObs.disconnect();
+  }
+},{threshold:.05});
+heroObs.observe(heroPage);
+
+/* ══ SCROLL REVEAL ══ */
+const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.07});
+document.querySelectorAll('.rv').forEach(el=>io.observe(el));
+
+/* ══ SCHEDULE: render from localStorage ══ */
+const SCHED_KEY = 'lienebelle_schedule';
+const SCHED_DEFAULT = [
+  {day:'月',time:'21:00',content:'雑談 / 夢語り',note:'夢の話や\n日常雑談'},
+  {day:'火',time:'',content:'',note:''},
+  {day:'水',time:'22:00',content:'ゲーム配信',note:'様々なゲームを\n夢の目で遊ぶ'},
+  {day:'木',time:'',content:'',note:''},
+  {day:'金',time:'21:00',content:'歌枠',note:'夢の声で\n歌をうたう'},
+  {day:'土',time:'',content:'',note:''},
+  {day:'日',time:'20:00',content:'不定期枠',note:'気まぐれな\n夢の時間'},
+];
+const rotations = [-0.7,0.5,-0.4,0.6,-0.5,0.4,-0.3];
+const delays = ['d1','d1','d1','d2','d2','d2','d2'];
+
+function renderSchedule(){
+  const raw = localStorage.getItem(SCHED_KEY);
+  const data = raw ? JSON.parse(raw) : SCHED_DEFAULT;
+  const grid = document.getElementById('schedGrid');
+  if(!grid) return;
+  grid.innerHTML = data.map((d,i) => {
+    const hasStream = d.time || d.content;
+    const noteHtml = (d.note||'—').replace(/\n/g,'<br>');
+    return `
+    <div class="sched-card rv ${delays[i]}" style="--r:${rotations[i]}deg">
+      <div class="pin"></div>
+      <div class="sched-card-inner">
+        <div class="sched-front">
+          <div class="sc-day">${d.day}</div>
+          ${hasStream ? `<div class="sc-time">${d.time} —</div><div class="sc-content">${d.content}</div>` : `<div class="sc-off">配信なし</div>`}
+        </div>
+        <div class="sched-back">
+          <div class="sched-back-note">${noteHtml}</div>
+          <div class="sched-back-day">${d.day}</div>
+        </div>
+      </div>
+    </div>`;
+  }).join('') + `
+    <div class="sched-card note-card rv d3">
+      <div class="sched-card-inner">
+        <div class="sched-front" style="background:transparent;border:none;box-shadow:none;">
+          <p class="sched-note-text">※ 変更の際はSNSにてお知らせします</p>
+        </div>
+      </div>
+    </div>`;
+  // re-observe new elements
+  grid.querySelectorAll('.rv').forEach(el => io.observe(el));
+}
+renderSchedule();
+
+/* ══ MOBILE NAV ══ */
+const mNav=document.getElementById('mNav');
+document.getElementById('burger').addEventListener('click',()=>mNav.classList.add('open'));
+document.getElementById('mClose').addEventListener('click',()=>mNav.classList.remove('open'));
+function cNav(){mNav.classList.remove('open');}
+
+/* ══ IMAGE MODAL ══ */
+const modal = document.getElementById("imgModal");
+const modalImg = document.getElementById("modalImg");
+const refSheet = document.querySelector(".p-ref-sheet");
+const modalClose = document.getElementById("modalClose");
+
+if(refSheet) {
+  refSheet.style.pointerEvents = "auto";
+  refSheet.addEventListener("click", function(){
+    modal.classList.add("show");
+    modalImg.src = this.src;
+  });
+}
+function closeModal() {
+  modal.classList.remove("show");
+}
+if(modalClose) modalClose.addEventListener("click", closeModal);
+if(modal) modal.addEventListener("click", function(e){
+  if(e.target === modal) closeModal();
+});
+
+/* ══ BGM CONTROL ══ */
+const bgmAudio = document.getElementById('bgmAudio');
+const bgmBtn = document.getElementById('bgmBtn');
+const iconMute = document.getElementById('iconMute');
+const iconPlay = document.getElementById('iconPlay');
+const entranceOverlay = document.getElementById('entranceOverlay');
+const enterBtn = document.getElementById('enterBtn');
+
+if(bgmBtn && bgmAudio && enterBtn) {
+  // 音量を控えめに設定（0.2 = 20%）
+  bgmAudio.volume = 0.2; 
+
+  enterBtn.addEventListener('click', () => {
+    // 再生を開始
+    bgmAudio.play().then(() => {
+      bgmBtn.classList.add('playing');
+      iconMute.style.display = 'none';
+      iconPlay.style.display = 'block';
+    }).catch(err => console.log("Playback interaction required."));
+
+    // オーバーレイを消す
+    entranceOverlay.style.opacity = '0';
+    setTimeout(() => {
+      entranceOverlay.style.display = 'none';
+    }, 1200);
+  });
+
+  // 右下のボタン操作
+  bgmBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if(bgmAudio.paused) {
+      bgmAudio.play();
+      bgmBtn.classList.add('playing');
+      iconMute.style.display = 'none';
+      iconPlay.style.display = 'block';
+    } else {
+      bgmAudio.pause();
+      bgmBtn.classList.remove('playing');
+      iconMute.style.display = 'block';
+      iconPlay.style.display = 'none';
+    }
+  });
+}
+
+</script>
+</body>
+</html>
