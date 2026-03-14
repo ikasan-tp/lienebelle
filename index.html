@@ -146,8 +146,12 @@
     }
     .nav-tab:hover { color:var(--page); background:rgba(160,124,58,.05); }
     .nav-tab:hover::after { transform:scaleX(1); }
+    /* アクティブ状態 */
+    .nav-tab.active { color:var(--page2); }
+    .nav-tab.active::after { transform:scaleX(1); background:var(--gold); }
     .nav-burger { display:none; flex-direction:column; gap:5px; cursor:pointer; padding:6px; align-self:center; }
-    .nav-burger span { display:block; width:22px; height:1px; background:var(--faded); }
+    .nav-burger span { display:block; width:22px; height:1px; background:var(--faded); transition:background .25s; }
+    .nav-burger:hover span { background:var(--page); }
 
     /* ══════════════ PAGE ENTRANCE ══════════════ */
     /* Pages drop onto the desk one by one */
@@ -541,7 +545,22 @@
     }
     .sc-time { font-family:'Caveat',cursive; font-size:.85rem; color:var(--faded); margin-bottom:.3rem; }
     .sc-content { font-family:'EB Garamond',serif; font-size:.95rem; color:var(--ink2); }
-    .sc-off { font-family:'Caveat',cursive; font-size:.8rem; color:var(--faded); font-style:italic; }
+    /* 配信なし — 薄い印鑑風スタンプ */
+    .sc-off {
+      display:inline-flex; align-items:center; justify-content:center;
+      margin-top:.5rem;
+      width:52px; height:52px; border-radius:50%;
+      border:1.5px solid rgba(120,90,30,.2);
+      font-family:'Cormorant Unicase',serif; font-size:.5rem;
+      letter-spacing:.12em; color:rgba(120,90,30,.35);
+      text-transform:uppercase; text-align:center; line-height:1.6;
+      transform:rotate(-8deg);
+      position:relative;
+    }
+    .sc-off::before {
+      content:''; position:absolute; inset:3px; border-radius:50%;
+      border:0.5px solid rgba(120,90,30,.12);
+    }
     .sched-note-text {
       font-family:'Caveat',cursive; font-size:.9rem; color:var(--faded);
       text-align:center; padding-top:.3rem;
@@ -618,6 +637,15 @@
     .t-desc { font-family:'Caveat',cursive; font-size:.8rem; color:var(--faded); display:block; margin-top:.1rem; }
     .t-arr { font-size:.9rem; color:var(--wine2); opacity:.55; transition:opacity .25s,transform .25s; padding-left:.8rem; }
     .ticket:hover .t-arr { opacity:1; transform:translateX(3px); }
+    .t-icon {
+      display:flex; align-items:center; justify-content:center;
+      width:36px; height:36px; border-radius:50%;
+      background:rgba(120,90,30,.08); border:1px solid rgba(120,90,30,.18);
+      margin-right:1.1rem; flex-shrink:0;
+      transition:background .25s, border-color .25s;
+    }
+    .ticket:hover .t-icon { background:rgba(120,90,30,.15); border-color:rgba(120,90,30,.35); }
+    .t-icon svg { width:16px; height:16px; }
 
     /* ══════════════ FOOTER ══════════════ */
     .footer-pg {
@@ -1044,12 +1072,23 @@
       <div class="links-grid rv d1">
         <a href="https://www.youtube.com/channel/UCoTlUnbIeu2owBT6_CeZyUA" target="_blank" class="ticket">
           <div class="ticket-sheen"></div>
-          <div><span class="t-name">YouTube</span><span class="t-desc">Video &amp; Live Stream</span></div>
+          <div class="t-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" fill="rgba(122,30,42,.55)"/>
+              <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="rgba(228,216,188,.8)"/>
+            </svg>
+          </div>
+          <div style="flex:1"><span class="t-name">YouTube</span><span class="t-desc">Video &amp; Live Stream</span></div>
           <span class="t-arr">→</span>
         </a>
         <a href="https://x.com/lnbl_" target="_blank" class="ticket">
           <div class="ticket-sheen"></div>
-          <div><span class="t-name">X / Twitter</span><span class="t-desc">Updates &amp; Daily Posts</span></div>
+          <div class="t-icon">
+            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.912-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="rgba(100,78,40,.75)"/>
+            </svg>
+          </div>
+          <div style="flex:1"><span class="t-name">X / Twitter</span><span class="t-desc">Updates &amp; Daily Posts</span></div>
           <span class="t-arr">→</span>
         </a>
       </div>
@@ -1181,6 +1220,28 @@ heroObs.observe(heroPage);
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.07});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 
+/* ══ NAV ACTIVE ══ */
+const navSections = ['profile','schedule','guidelines','links'];
+const navLinks = {};
+navSections.forEach(id => {
+  navLinks[id] = document.querySelector(`.nav-tab[href="#${id}"]`);
+});
+const navObs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    const id = e.target.id;
+    if(!navLinks[id]) return;
+    if(e.isIntersecting) {
+      // 全タブのアクティブを外してから対象だけON
+      Object.values(navLinks).forEach(t => t?.classList.remove('active'));
+      navLinks[id].classList.add('active');
+    }
+  });
+}, { rootMargin: '-40% 0px -50% 0px', threshold: 0 });
+navSections.forEach(id => {
+  const el = document.getElementById(id);
+  if(el) navObs.observe(el);
+});
+
 /* ══ SCHEDULE: render from Database (Supabase) ══ */
 const SUPABASE_URL = 'https://bjriwruvryptbxhcencf.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcml3cnV2cnlwdGJ4aGNlbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODI3MjEsImV4cCI6MjA4OTA1ODcyMX0.LRJOsq5Xd3Cp_MmmWUjqLn850yJ0aYzqeu98XmKeYyE';
@@ -1247,7 +1308,7 @@ async function renderSchedule(){
       <div class="sched-card-inner">
         <div class="sched-front">
           <div class="sc-day">${d.day}</div>
-          ${hasStream ? `<div class="sc-time">${d.time} —</div><div class="sc-content">${d.content}</div>` : `<div class="sc-off">配信なし</div>`}
+          ${hasStream ? `<div class="sc-time">${d.time} —</div><div class="sc-content">${d.content}</div>` : `<div class="sc-off">rest<br>day</div>`}
         </div>
         <div class="sched-back">
           <div class="sched-back-note">${noteHtml}</div>
