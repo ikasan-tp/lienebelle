@@ -160,12 +160,19 @@
       padding: 2.5rem 1rem;
     }
     .spread-wrap:first-of-type { padding-top: calc(52px + 3.5rem); }
+    /* Heroの直後だけ余白を広く取ってページをめくる感覚を強調 */
+    #profile   { padding-top: 1rem; }
+    /* セクション間の重さに差をつける */
+    #schedule   { padding-top: 3.5rem; }
+    #guidelines { padding-top: 3.5rem; }
+    #links      { padding-top: 3.5rem; padding-bottom: 1rem; }
 
     .ledger-page {
       width: min(1000px,96vw);
       background: var(--page);
       border-radius: 2px;
       position: relative;
+      overflow: hidden;
       box-shadow:
         0 0 0 1px rgba(100,75,30,.3),
         0 2px 0 1px rgba(0,0,0,.5),
@@ -281,7 +288,7 @@
       flex-direction: column;
       align-items: center;
       gap: 0.8rem;
-      margin: 3.5rem 0 5.5rem; /* 隙間をさらに広げる */
+      margin: 3.5rem 0 5.5rem;
       position: relative;
       z-index: 5;
     }
@@ -307,25 +314,86 @@
     }
 
     /* ══════════════ CHAPTER HEAD ══════════════ */
-    .ch-head { margin-bottom:3rem; }
+    .ch-head { margin-bottom:3rem; position:relative; }
     .ch-label {
       font-family:'Caveat',cursive; font-size:.88rem;
-      color:var(--faded); display:block; margin-bottom:.2rem;
+      color:var(--faded); display:block; margin-bottom:.4rem;
     }
     .ch-title {
       font-family:'Playfair Display',serif; font-weight:700;
       font-size:clamp(1.4rem,3vw,2.1rem); color:var(--ink); line-height:1.1;
       display:flex; align-items:center; gap:1rem;
+      position:relative; z-index:1;
     }
     .ch-title::before,.ch-title::after {
       content:''; flex:0 0 auto; height:1px; background:rgba(160,124,58,.35);
     }
     .ch-title::before { width:18px; }
-    .ch-title::after  { width:30px; }
+    .ch-title::after  { flex:1; max-width:100%; background:linear-gradient(to right, rgba(160,124,58,.35), transparent 85%); }
     .ch-roman { display:none; }
     .ch-title-jp {
       font-family:'Cormorant Unicase',serif; font-size:.7rem;
       letter-spacing:.28em; color:var(--ink3); display:block; margin-top:.3rem;
+      padding-left:calc(18px + 1rem);
+    }
+    /* ローマ数字 */
+    .ch-numeral {
+      position:absolute; right:0; top:-.5rem;
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:900;
+      font-size:clamp(3rem,5vw,5rem); line-height:1;
+      color:rgba(120,90,30,.13);
+      user-select:none; pointer-events:none; z-index:0;
+      letter-spacing:-.02em;
+    }
+
+    /* ══════════════ PAGE TINTS (セクション別背景色) ══════════════ */
+    /* About — 標準ベージュ（デフォルト） */
+    #profile .ledger-page {
+      background-color: #e8ddc4;
+    }
+    /* Schedule — 少し暗めのセピア */
+    #schedule .ledger-page {
+      background-color: #dfd3b8;
+      background-image:
+        repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(120,90,30,.065) 26px,rgba(120,90,30,.065) 27px);
+    }
+    /* Guidelines — わずかに青みがかった羊皮紙 */
+    #guidelines .ledger-page {
+      background-color: #e2dac8;
+      background-image:
+        repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(90,80,60,.06) 26px,rgba(90,80,60,.06) 27px);
+    }
+    /* Links — 温かみのある薄黄 */
+    #links .ledger-page {
+      background-color: #ece0c2;
+      background-image:
+        repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(140,100,30,.065) 26px,rgba(140,100,30,.065) 27px);
+    }
+    @media(max-width:760px){
+      .ch-numeral { font-size:clamp(3.5rem,12vw,5rem); right:-.5rem; }
+    }
+
+    /* ══════════════ SECTION SEPARATOR ══════════════ */
+    .sec-sep {
+      display:flex; align-items:center; justify-content:center;
+      gap:1.2rem; position:relative; z-index:5;
+      margin:0 auto;
+      width:min(1000px,96vw);
+      padding:0 1rem;
+      height:4rem;
+      opacity:0; transform:translateY(8px);
+      transition:opacity .8s ease, transform .8s ease;
+    }
+    .sec-sep.in { opacity:1; transform:translateY(0); }
+    .sec-sep-line {
+      flex:1; height:1px;
+      background:linear-gradient(to var(--dir,right), transparent, rgba(160,124,58,.25) 60%);
+    }
+    .sec-sep-line:last-child { --dir:left; }
+    .sec-sep-glyph {
+      font-family:'Cormorant Unicase',serif; font-size:.75rem;
+      color:rgba(160,124,58,.45); letter-spacing:.3em;
+      white-space:nowrap;
     }
 
     /* ══════════════ HERO ══════════════ */
@@ -470,8 +538,23 @@
     .ledger-tbl { width:100%; border-collapse:collapse; margin:1.2rem 0 1.6rem; }
     .ledger-tbl tr { border-bottom:1px solid rgba(160,124,58,.12); }
     .ledger-tbl tr:first-child { border-top:1px solid rgba(160,124,58,.18); }
-    .ledger-tbl td { padding:.65rem 0; font-size:.97rem; vertical-align:baseline; color:var(--ink2); }
-    .ledger-tbl td:first-child { font-family:'Caveat',cursive; font-size:.83rem; color:var(--faded); width:100px; }
+    .ledger-tbl td { padding:.7rem 0; font-size:.97rem; vertical-align:baseline; color:var(--ink2); }
+    /* 左カラム：スタンプ風ラベル */
+    .ledger-tbl td:first-child {
+      width:110px; padding-right:.8rem; vertical-align:top; padding-top:.85rem;
+    }
+    .tbl-label {
+      display:inline-block;
+      font-family:'Cormorant Unicase',serif; font-size:.58rem;
+      letter-spacing:.18em; text-transform:uppercase;
+      color:var(--gold2);
+      border:1px solid rgba(160,124,58,.3);
+      padding:.15rem .5rem .12rem;
+      border-radius:1px;
+      background:rgba(160,124,58,.05);
+      white-space:nowrap;
+      line-height:1.6;
+    }
     .p-bio {
       font-family:'EB Garamond',serif; font-style:italic;
       font-size:1.02rem; line-height:2.2; color:var(--ink2);
@@ -541,9 +624,11 @@
 
     .sc-day {
       font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
-      font-size:2rem; color:var(--ink); line-height:1; margin-bottom:.2rem;
+      font-size:2rem; color:var(--ink); line-height:1;
+      margin-bottom:.5rem; padding-bottom:.5rem;
+      border-bottom:1px solid rgba(120,90,30,.15);
     }
-    .sc-time { font-family:'Caveat',cursive; font-size:.85rem; color:var(--faded); margin-bottom:.3rem; }
+    .sc-time { font-family:'Caveat',cursive; font-size:.85rem; color:var(--faded); margin-top:.35rem; margin-bottom:.2rem; }
     .sc-content { font-family:'EB Garamond',serif; font-size:.95rem; color:var(--ink2); }
     /* 配信なし — 薄い印鑑風スタンプ */
     .sc-off {
@@ -605,47 +690,65 @@
     }
 
     /* ══════════════ LINKS ══════════════ */
-    .links-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.4rem; }
+    .links-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:1.6rem; }
     .ticket {
       background:var(--page-lt);
       border:1px solid rgba(120,90,30,.22);
-      display:flex; align-items:center; justify-content:space-between;
-      padding:1.4rem 1.6rem;
+      display:flex; flex-direction:column;
+      padding:0;
       text-decoration:none; color:inherit;
       position:relative; overflow:hidden;
-      box-shadow:2px 3px 8px rgba(0,0,0,.2);
-      transition:transform .25s, box-shadow .25s;
+      box-shadow:2px 4px 14px rgba(0,0,0,.22);
+      transition:transform .3s cubic-bezier(.22,1,.36,1), box-shadow .3s;
     }
+    .ticket:hover { transform:translateY(-3px); box-shadow:4px 10px 28px rgba(0,0,0,.35); }
+    /* 左端のアクセントバー */
     .ticket::before {
       content:''; position:absolute; left:0; top:0; bottom:0;
-      width:3px; background:var(--wine);
+      width:4px; transition:width .3s;
     }
-    .ticket::after {
-      content:''; position:absolute; right:46px; top:0; bottom:0; width:1px;
-      background:repeating-linear-gradient(to bottom,rgba(120,90,30,.3) 0,rgba(120,90,30,.3) 4px,transparent 4px,transparent 8px);
-    }
-    /* shimmer sweep on hover */
+    .ticket:hover::before { width:6px; }
+    .ticket.yt::before { background:linear-gradient(to bottom,rgba(180,40,40,.7),rgba(122,30,42,.9)); }
+    .ticket.tw::before { background:linear-gradient(to bottom,rgba(80,60,30,.5),rgba(120,90,30,.8)); }
+    /* 右端のミシン目なし */
+    /* shimmer */
     .ticket-sheen {
       position:absolute; inset:0; pointer-events:none;
-      background:linear-gradient(105deg,transparent 40%,rgba(255,220,120,.18) 50%,transparent 60%);
-      transform:translateX(-100%);
-      transition:transform .5s ease;
+      background:linear-gradient(105deg,transparent 35%,rgba(255,220,120,.15) 50%,transparent 65%);
+      transform:translateX(-120%); transition:transform .65s ease;
     }
-    .ticket:hover { transform:translateY(-2px); box-shadow:4px 6px 18px rgba(0,0,0,.35); }
-    .ticket:hover .ticket-sheen { transform:translateX(100%); }
-    .t-name { font-family:'Playfair Display',serif; font-style:italic; font-size:1.08rem; color:var(--ink); }
-    .t-desc { font-family:'Caveat',cursive; font-size:.8rem; color:var(--faded); display:block; margin-top:.1rem; }
-    .t-arr { font-size:.9rem; color:var(--wine2); opacity:.55; transition:opacity .25s,transform .25s; padding-left:.8rem; }
-    .ticket:hover .t-arr { opacity:1; transform:translateX(3px); }
+    .ticket:hover .ticket-sheen { transform:translateX(120%); }
+    /* ヘッダー：アイコン＋名前エリア */
+    .t-header {
+      display:flex; align-items:center; gap:1rem;
+      padding:1.4rem 1.6rem 1.2rem 1.6rem;
+      border-bottom:1px solid rgba(120,90,30,.1);
+    }
     .t-icon {
       display:flex; align-items:center; justify-content:center;
-      width:36px; height:36px; border-radius:50%;
-      background:rgba(120,90,30,.08); border:1px solid rgba(120,90,30,.18);
-      margin-right:1.1rem; flex-shrink:0;
-      transition:background .25s, border-color .25s;
+      width:38px; height:38px; border-radius:50%; flex-shrink:0;
+      transition:background .25s, transform .3s;
     }
-    .ticket:hover .t-icon { background:rgba(120,90,30,.15); border-color:rgba(120,90,30,.35); }
-    .t-icon svg { width:16px; height:16px; }
+    .ticket.yt .t-icon { background:rgba(122,30,42,.08); border:1px solid rgba(122,30,42,.22); }
+    .ticket.tw .t-icon { background:rgba(100,78,40,.08); border:1px solid rgba(100,78,40,.22); }
+    .ticket:hover .t-icon { transform:scale(1.08); }
+    .ticket.yt:hover .t-icon { background:rgba(122,30,42,.16); }
+    .ticket.tw:hover .t-icon { background:rgba(100,78,40,.16); }
+    .t-icon svg { width:17px; height:17px; }
+    .t-name { font-family:'Playfair Display',serif; font-style:italic; font-size:1.12rem; color:var(--ink); line-height:1; }
+    .t-handle { font-family:'Cormorant Unicase',serif; font-size:.58rem; letter-spacing:.18em; color:var(--faded); margin-top:.25rem; display:block; }
+    /* ボディ：説明文＋Open→ */
+    .t-body {
+      padding:.9rem 1.6rem;
+      display:flex; align-items:center; justify-content:space-between;
+    }
+    .t-desc { font-family:'Caveat',cursive; font-size:.82rem; color:var(--faded); }
+    .t-arr {
+      font-family:'Cormorant Unicase',serif; font-size:.65rem; letter-spacing:.2em;
+      color:var(--wine2); opacity:.5;
+      transition:opacity .25s, transform .25s;
+    }
+    .ticket:hover .t-arr { opacity:1; transform:translateX(4px); }
 
     /* ══════════════ FOOTER ══════════════ */
     .footer-pg {
@@ -653,14 +756,37 @@
       background:var(--page2); border-radius:2px;
       border:1px solid rgba(100,75,30,.25);
       box-shadow:0 4px 20px rgba(0,0,0,.5);
-      padding:1.8rem 3.5rem;
+      padding:1.8rem 3.5rem 1.8rem;
       display:flex; align-items:center; justify-content:space-between;
       position:relative; z-index:2;
+      overflow:hidden;
     }
     .footer-pg::before {
       content:''; position:absolute; top:0; bottom:0; left:0; width:14px;
       background:linear-gradient(to right,rgba(80,50,10,.18),transparent);
       border-radius:2px 0 0 2px;
+    }
+    /* 上部の装飾ライン */
+    .footer-pg::after {
+      content:'';
+      position:absolute; top:0; left:3.5rem; right:3.5rem; height:1px;
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(160,124,58,.15) 15%,
+        rgba(160,124,58,.5) 40%,
+        rgba(160,124,58,.5) 60%,
+        rgba(160,124,58,.15) 85%,
+        transparent
+      );
+    }
+    /* フッター内の装飾オーナメント */
+    .footer-ornament {
+      position:absolute; left:50%; top:0; transform:translate(-50%,-50%);
+      font-family:'Cormorant Unicase',serif; font-size:.7rem;
+      color:rgba(160,124,58,.55); letter-spacing:.25em;
+      background:var(--page2); padding:0 .8rem;
+      white-space:nowrap;
     }
     .f-brand { font-family:'Playfair Display',serif; font-style:italic; font-size:1.3rem; color:var(--ink); display:block; }
     .f-sub   { font-family:'Cormorant Unicase',serif; font-size:.58rem; letter-spacing:.28em; color:var(--faded); margin-top:2px; }
@@ -939,6 +1065,7 @@
     <div class="page-sheen"></div>
     <div class="page-content">
       <div class="ch-head rv">
+        <div class="ch-numeral">Ⅰ</div>
         <span class="ch-label">about the librarian</span>
         <div class="ch-title">About</div>
         <span class="ch-title-jp">司書について</span>
@@ -956,18 +1083,18 @@
           <div class="p-name-jp">リーネベル</div>
           <table class="ledger-tbl">
             <tbody>
-              <tr><td>Species</td><td>(自称)悪魔</td></tr>
-              <tr><td>Fan Name</td><td>お客様</td></tr>
-              <tr><td>Fan Mark</td><td>✥</td></tr>
-              <tr><td>Creator</td><td><a href="https://x.com/__y_o_u_k_a__" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">ようか</a> / <a href="https://x.com/torutl101" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">とる</a></td></tr>
+              <tr><td><span class="tbl-label">Species</span></td><td>(自称)悪魔</td></tr>
+              <tr><td><span class="tbl-label">Fan Name</span></td><td>お客様</td></tr>
+              <tr><td><span class="tbl-label">Fan Mark</span></td><td>✥</td></tr>
+              <tr><td><span class="tbl-label">Creator</span></td><td><a href="https://x.com/__y_o_u_k_a__" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">ようか</a> / <a href="https://x.com/torutl101" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">とる</a></td></tr>
               <tr>
-                <td>Stream Tag</td>
+                <td><span class="tbl-label">Stream Tag</span></td>
                 <td>
                   配信への感想・切り抜きなど：<a href="https://x.com/hashtag/Li_ra" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_ra</a>
                 </td>
               </tr>
               <tr>
-                <td>Fanart Tag</td>
+                <td><span class="tbl-label">Fanart Tag</span></td>
                 <td>
                   創作物全般：<a href="https://x.com/hashtag/Li_cre" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_cre</a><br>
                   グッズ等の写真：<a href="https://x.com/hashtag/Li_Ph" target="_blank" style="color:inherit;text-decoration:none;border-bottom:1px solid rgba(160,124,58,.4);">#Li_Ph</a><br>
@@ -990,11 +1117,18 @@
   </div>
 </div>
 
+<div class="sec-sep rv">
+  <div class="sec-sep-line"></div>
+  <span class="sec-sep-glyph">✦ &nbsp; ✥ &nbsp; ✦</span>
+  <div class="sec-sep-line"></div>
+</div>
+
 <div class="spread-wrap" id="schedule">
   <div class="ledger-page">
     <div class="page-sheen"></div>
     <div class="page-content">
       <div class="ch-head rv">
+        <div class="ch-numeral">Ⅱ</div>
         <span class="ch-label">streaming schedule</span>
         <div class="ch-title">Schedule</div>
         <span class="ch-title-jp">配信予定 <span id="schedPeriod" style="margin-left: 1.2rem; font-family: 'EB Garamond', serif; font-size: 0.9rem; opacity: 0.7;"></span></span>
@@ -1005,11 +1139,18 @@
   </div>
 </div>
 
+<div class="sec-sep rv">
+  <div class="sec-sep-line"></div>
+  <span class="sec-sep-glyph">✦ &nbsp; ✥ &nbsp; ✦</span>
+  <div class="sec-sep-line"></div>
+</div>
+
 <div class="spread-wrap" id="guidelines">
   <div class="ledger-page">
     <div class="page-sheen"></div>
     <div class="page-content">
       <div class="ch-head rv">
+        <div class="ch-numeral">Ⅲ</div>
         <span class="ch-label">fan creation guidelines</span>
         <div class="ch-title">Guidelines</div>
         <span class="ch-title-jp">二次創作について</span>
@@ -1060,36 +1201,59 @@
   </div>
 </div>
 
+<div class="sec-sep rv">
+  <div class="sec-sep-line"></div>
+  <span class="sec-sep-glyph">✦ &nbsp; ✥ &nbsp; ✦</span>
+  <div class="sec-sep-line"></div>
+</div>
+
 <div class="spread-wrap" id="links">
   <div class="ledger-page">
     <div class="page-sheen"></div>
     <div class="page-content">
       <div class="ch-head rv">
+        <div class="ch-numeral">Ⅳ</div>
         <span class="ch-label">find me at</span>
         <div class="ch-title">Links</div>
         <span class="ch-title-jp">リンク集</span>
       </div>
       <div class="links-grid rv d1">
-        <a href="https://www.youtube.com/channel/UCoTlUnbIeu2owBT6_CeZyUA" target="_blank" class="ticket">
+        <a href="https://www.youtube.com/channel/UCoTlUnbIeu2owBT6_CeZyUA" target="_blank" class="ticket yt">
           <div class="ticket-sheen"></div>
-          <div class="t-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" fill="rgba(122,30,42,.55)"/>
-              <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="rgba(228,216,188,.8)"/>
-            </svg>
+          <div class="t-header">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M22.54 6.42a2.78 2.78 0 0 0-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 0 0 1.46 6.42 29 29 0 0 0 1 12a29 29 0 0 0 .46 5.58 2.78 2.78 0 0 0 1.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 0 0 1.95-1.96A29 29 0 0 0 23 12a29 29 0 0 0-.46-5.58z" fill="rgba(140,35,45,.6)"/>
+                <polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="rgba(228,216,188,.85)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="t-name">YouTube</div>
+              <span class="t-handle">@Lienebelle</span>
+            </div>
           </div>
-          <div style="flex:1"><span class="t-name">YouTube</span><span class="t-desc">Video &amp; Live Stream</span></div>
-          <span class="t-arr">→</span>
+          <div class="t-body">
+            <span class="t-desc">Video &amp; Live Stream</span>
+            <span class="t-arr">Open →</span>
+          </div>
         </a>
-        <a href="https://x.com/lnbl_" target="_blank" class="ticket">
+        <a href="https://x.com/lnbl_" target="_blank" class="ticket tw">
           <div class="ticket-sheen"></div>
-          <div class="t-icon">
-            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.912-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="rgba(100,78,40,.75)"/>
-            </svg>
+          <div class="t-header">
+            <div class="t-icon">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622 5.912-5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z" fill="rgba(100,78,40,.75)"/>
+              </svg>
+            </div>
+            <div>
+              <div class="t-name">X / Twitter</div>
+              <span class="t-handle">@lnbl_</span>
+            </div>
           </div>
-          <div style="flex:1"><span class="t-name">X / Twitter</span><span class="t-desc">Updates &amp; Daily Posts</span></div>
-          <span class="t-arr">→</span>
+          <div class="t-body">
+            <span class="t-desc">Updates &amp; Daily Posts</span>
+            <span class="t-arr">Open →</span>
+          </div>
         </a>
       </div>
     </div>
@@ -1098,6 +1262,7 @@
 
 <div class="spread-wrap">
   <div class="footer-pg rv">
+    <div class="footer-ornament">✥ Bibliotheca Somnii ✥</div>
     <div>
       <span class="f-brand">Lienebelle</span>
       <span class="f-sub">Bibliotheca Somnii — 夢書館</span>
