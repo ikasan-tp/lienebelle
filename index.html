@@ -1086,7 +1086,11 @@ heroObs.observe(heroPage);
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('in');}),{threshold:.07});
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 
-/* ══ SCHEDULE: render from localStorage ══ */
+/* ══ SCHEDULE: render from Database (Supabase) ══ */
+// 【重要】ここが定義されていないためにエラーが出ていました
+const SUPABASE_URL = 'https://bjriwruvryptbxhcencf.supabase.co'; 
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcml3cnV2cnlwdGJ4aGNlbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODI3MjEsImV4cCI6MjA4OTA1ODcyMX0.LRJOsq5Xd3Cp_MmmWUjqLn850yJ0aYzqeu98XmKeYyE';
+
 const SCHED_KEY = 'lienebelle_schedule';
 const SCHED_DEFAULT = [
   {day:'月',time:'21:00',content:'雑談',note:'〈雑談タイトル〉'},
@@ -1098,10 +1102,10 @@ const SCHED_DEFAULT = [
   {day:'日',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
 ];
 const rotations = [-0.7,0.5,-0.4,0.6,-0.5,0.4,-0.3];
-const delays = ['d1','d1','d1','d2','d2','d2','d2'];
+const delays = ['d1', 'd1', 'd1', 'd2', 'd2', 'd2', 'd2'];
 
 async function renderSchedule(){
-  let data = SCHED_DEFAULT;
+  let data = SCHED_DEFAULT; 
   let duration = "";
 
   try {
@@ -1113,19 +1117,19 @@ async function renderSchedule(){
     });
     const result = await response.json();
     
-    // 修正ポイント：daysが空配列の場合も、デフォルト（SCHED_DEFAULT）を使うように変更
+    // データが存在し、かつ days が空ではない場合のみ反映
     if (result && result.length > 0 && result[0].data) {
-      duration = result[0].data.duration || "";
-      const daysFromDb = result[0].data.days;
-      if (daysFromDb && daysFromDb.length > 0) {
-        data = daysFromDb;
+      const dbPayload = result[0].data;
+      duration = dbPayload.duration || "";
+      
+      if (Array.isArray(dbPayload.days) && dbPayload.days.length > 0) {
+        data = dbPayload.days;
       }
     }
   } catch (e) {
     console.error("データ取得に失敗しました。デフォルトを表示します。", e);
   }
 
-  // ---【日付（期間）の反映】---
   const periodEl = document.getElementById('schedPeriod');
   if(periodEl) {
     periodEl.textContent = duration;
@@ -1134,12 +1138,14 @@ async function renderSchedule(){
   const grid = document.getElementById('schedGrid');
   if(!grid) return;
 
-  // カードの描画
   grid.innerHTML = data.map((d,i) => {
     const hasStream = (d.time && d.time !== '') || (d.content && d.content !== '');
     const noteHtml = (d.note||'—').replace(/\n/g,'<br>');
+    const rotation = rotations[i] || 0;
+    const delay = delays[i] || 'd1';
+
     return `
-    <div class="sched-card rv ${delays[i]}" style="--r:${rotations[i]}deg">
+    <div class="sched-card rv ${delay}" style="--r:${rotation}deg">
       <div class="pin"></div>
       <div class="sched-card-inner">
         <div class="sched-front">
@@ -1161,8 +1167,9 @@ async function renderSchedule(){
       </div>
     </div>`;
   
-  // スクロールアニメーションの再適用
-  grid.querySelectorAll('.rv').forEach(el => io.observe(el));
+  grid.querySelectorAll('.rv').forEach(el => {
+    if (typeof io !== 'undefined') io.observe(el);
+  });
 }
 renderSchedule();
 
