@@ -57,6 +57,7 @@
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
+    /* ページ読み込み時は必ずトップを表示 */
 
     /* 画像の保存・ドラッグ禁止 */
     img {
@@ -218,27 +219,56 @@
     /* ══════════════ BOOKSHELF DIVIDER ══════════════ */
     .bookshelf-wrap {
       position: relative; z-index: 5;
-      height: 90px;
+      height: 110px;
       display: flex; align-items: flex-end;
-      gap: 2px; padding: 0 2vw;
+      gap: 0px; padding: 0 2vw;
       overflow: hidden;
-      /* 本棚の底をフェードアウトさせてAboutに溶け込ませる */
-      -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-      mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
-      /* カードの横幅に揃える & 上部に隙間を作る */
+      -webkit-mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
+      mask-image: linear-gradient(to bottom, black 55%, transparent 100%);
       width: min(1000px, 96vw);
       margin: 4rem auto 0;
     }
-    /* 本の揺れアニメーション */
     @keyframes bookSway {
-      0%, 100% { transform: translateY(0); }
-      50%       { transform: translateY(-6px); }
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      33%       { transform: translateY(-4px) rotate(0.3deg); }
+      66%       { transform: translateY(-2px) rotate(-0.2deg); }
     }
-    /* 個別の本（シルエット） */
     .shelf-book {
       flex-shrink: 0;
       border-radius: 1px 1px 0 0;
       animation: bookSway 4s ease-in-out infinite;
+      position: relative;
+    }
+    /* 背表紙ライン（洋書の帯装飾） */
+    .shelf-book .b-line {
+      position: absolute;
+      left: 0; right: 0;
+      background: rgba(255,255,255,0.07);
+      pointer-events: none;
+    }
+    /* タイトル縦書きテキスト */
+    .shelf-book .b-title {
+      position: absolute;
+      left: 50%; top: 12%;
+      transform: translateX(-50%);
+      writing-mode: vertical-rl;
+      font-family: 'Cormorant Unicase', serif;
+      font-size: 7px;
+      letter-spacing: 0.12em;
+      color: rgba(255,255,255,0.18);
+      white-space: nowrap;
+      overflow: hidden;
+      max-height: 70%;
+      pointer-events: none;
+      user-select: none;
+    }
+    /* 金箔ライン */
+    .shelf-book .b-gold {
+      position: absolute;
+      left: 15%; right: 15%;
+      height: 1px;
+      background: rgba(160,124,58,0.3);
+      pointer-events: none;
     }
 
     /* ══════════════ SCROLL INDICATOR ══════════════ */
@@ -775,15 +805,102 @@
 <script>
 (function(){
   const wrap = document.getElementById('bookshelfWrap');
-  const bc = ['#1f1b20','#26191c','#191e1a','#1d1c1e','#261e16','#201b1d','#151418','#21171a'];
-  for (let i = 0; i < 200; i++) {
+
+  // 洋書らしい色パレット（暗めの茶・くすみ赤系）
+  const palettes = [
+    { base:'#2e1608', shadow:'#1a0c04', accent:'rgba(180,135,60,0.4)'  }, // ダークバーントブラウン
+    { base:'#260e06', shadow:'#160804', accent:'rgba(165,120,50,0.38)'  }, // ディープコーヒー
+    { base:'#321408', shadow:'#1e0c04', accent:'rgba(185,140,60,0.38)'  }, // チョコレートブラウン
+    { base:'#3a1410', shadow:'#220c08', accent:'rgba(190,140,65,0.35)'  }, // くすみレンガ
+    { base:'#2e1010', shadow:'#1c0808', accent:'rgba(170,115,55,0.38)'  }, // アッシュクリムゾン
+    { base:'#381412', shadow:'#220c0a', accent:'rgba(180,125,55,0.35)'  }, // スモークバーガンディ
+    { base:'#30100e', shadow:'#1c0808', accent:'rgba(175,120,50,0.38)'  }, // フェードオックスブラッド
+    { base:'#261608', shadow:'#160e04', accent:'rgba(180,138,58,0.42)'  }, // アンティークセピア
+    { base:'#2c1010', shadow:'#1a0808', accent:'rgba(172,118,52,0.38)'  }, // モーブレッド
+    { base:'#361a0c', shadow:'#200e06', accent:'rgba(188,142,62,0.4)'   }, // タンドゥールブラウン
+  ];
+
+  // 洋書タイトル候補（雰囲気のあるラテン・英語）
+  const titles = [
+    'De Somniis','Arcana','Noctis','Fabula','Memoria',
+    'Somnium','Lux Aeterna','Via Obscura','Anima','Codex',
+    'Lienebelle','Rêves','Bibliotheca','Umbra','Aurora',
+    'Epistola','Mysterium','Libellus','Iter','Vigilia',
+  ];
+
+  // 本の種類バリエーション
+  const bookTypes = [
+    'thick-worn',  // 分厚い使い込まれた本
+    'slim-elegant',// 薄くエレガント
+    'medium-ribbed',// 普通サイズ・背表紙リブあり
+    'tall-narrow', // 背が高く細い
+  ];
+
+  for (let i = 0; i < 180; i++) {
+    const p = palettes[Math.floor(Math.random() * palettes.length)];
+    const type = bookTypes[Math.floor(Math.random() * bookTypes.length)];
+
+    let w, h;
+    switch(type) {
+      case 'thick-worn':   w = 18 + Math.random()*10; h = 55 + Math.random()*35; break;
+      case 'slim-elegant': w = 7  + Math.random()*5;  h = 60 + Math.random()*30; break;
+      case 'medium-ribbed':w = 12 + Math.random()*8;  h = 50 + Math.random()*35; break;
+      case 'tall-narrow':  w = 8  + Math.random()*6;  h = 70 + Math.random()*25; break;
+    }
+
     const b = document.createElement('div');
     b.className = 'shelf-book';
-    b.style.height = (38 + Math.random() * 52) + 'px';
-    b.style.width  = (8 + Math.random() * 13) + 'px';
-    b.style.background = bc[Math.floor(Math.random() * bc.length)];
-    b.style.animationDelay = (Math.random() * 5) + 's';
-    b.style.animationDuration = (4 + Math.random() * 4) + 's';
+    b.style.cssText = `
+      width:${w}px; height:${h}px;
+      background: linear-gradient(
+        to right,
+        ${p.shadow} 0%,
+        ${p.base} 15%,
+        color-mix(in srgb, ${p.base} 85%, white) 48%,
+        ${p.base} 55%,
+        ${p.shadow} 100%
+      );
+      box-shadow: inset -2px 0 4px rgba(0,0,0,0.5), inset 1px 0 2px rgba(255,255,255,0.05);
+      animation-delay:${Math.random()*6}s;
+      animation-duration:${5+Math.random()*5}s;
+      margin-right:${Math.random()<0.15 ? 2 : 0}px;
+    `;
+
+    // 背表紙の金箔ライン（上下）
+    if (Math.random() > 0.35) {
+      const g1 = document.createElement('div');
+      g1.className = 'b-gold';
+      g1.style.top = (8 + Math.random()*6) + 'px';
+      b.appendChild(g1);
+    }
+    if (Math.random() > 0.35) {
+      const g2 = document.createElement('div');
+      g2.className = 'b-gold';
+      g2.style.bottom = (8 + Math.random()*6) + 'px';
+      b.appendChild(g2);
+    }
+
+    // 背表紙リブ（横線）— medium-ribbedとthick-wornに
+    if ((type === 'medium-ribbed' || type === 'thick-worn') && h > 60) {
+      const ribCount = Math.floor(2 + Math.random()*3);
+      for (let r = 0; r < ribCount; r++) {
+        const rib = document.createElement('div');
+        rib.className = 'b-line';
+        const pos = 15 + (r+1) * (70/(ribCount+1));
+        rib.style.cssText = `top:${pos}%; height:${1+Math.random()*1.5}px;`;
+        b.appendChild(rib);
+      }
+    }
+
+    // 縦書きタイトル（幅が広くて高さがある本のみ）
+    if (w > 11 && h > 65 && Math.random() > 0.3) {
+      const titleEl = document.createElement('div');
+      titleEl.className = 'b-title';
+      titleEl.textContent = titles[Math.floor(Math.random()*titles.length)];
+      titleEl.style.color = p.accent;
+      b.appendChild(titleEl);
+    }
+
     wrap.appendChild(b);
   }
 })();
@@ -1028,6 +1145,11 @@ function drawMotes(){
 }
 
 let t=0; (function loop(){cx.clearRect(0,0,W,H);drawMagic(t);drawMotes();t++;requestAnimationFrame(loop);})();
+
+/* ══ SCROLL TO TOP ON LOAD ══ */
+if('scrollRestoration' in history) history.scrollRestoration = 'manual';
+window.addEventListener('beforeunload', () => window.scrollTo(0, 0));
+
 
 /* ══ PAGE DROP: stagger each ledger-page on scroll ══ */
 const pages = document.querySelectorAll('.ledger-page');
