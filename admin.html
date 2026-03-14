@@ -227,10 +227,9 @@
 <body>
 <div class="wrap">
 
-  <!-- Header -->
   <div class="ledger-header">
     <div class="header-eyebrow">Bibliotheca Somnii</div>
-<div class="header-title">管理室</div>
+    <div class="header-title">管理室</div>
     <span class="header-sub">Schedule Editor</span>
     
     <div class="header-date-field" style="margin-top: 1.2rem; display: flex; align-items: center; gap: 0.8rem;">
@@ -246,12 +245,10 @@
     <a href="index.html" class="back-link">トップページへ戻る</a>
   </div>
 
-  <!-- Schedule editor -->
   <div class="ledger-body">
     <span class="section-label">配信スケジュール — 週間</span>
     <div class="day-rows" id="dayRows">
-      <!-- JS rendered -->
-    </div>
+      </div>
     <div class="action-bar">
       <div style="display:flex;gap:.8rem;align-items:center;flex-wrap:wrap;">
         <button class="btn-save" onclick="saveSchedule()">保存して反映</button>
@@ -264,50 +261,23 @@
 </div>
 
 <script>
-
-// さっき控えたURLとKeyを入れてください
+/* ══ CONFIG ══ */
 const SUPABASE_URL = 'https://bjriwruvryptbxhcencf.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcml3cnV2cnlwdGJ4aGNlbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODI3MjEsImV4cCI6MjA4OTA1ODcyMX0.LRJOsq5Xd3Cp_MmmWUjqLn850yJ0aYzqeu98XmKeYyE';
-
-async function saveSchedule() {
-  const data = collectData();
-  const duration = document.getElementById('schedDuration').value.trim();
-
-  // Supabaseへ保存
-  const response = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=eq.lienebelle`, {
-    method: 'PATCH',
-    headers: {
-      'apikey': SUPABASE_KEY,
-      'Authorization': `Bearer ${SUPABASE_KEY}`,
-      'Content-Type': 'application/json',
-      'Prefer': 'return=minimal'
-    },
-    body: JSON.stringify({
-      data: { duration: duration, days: data }
-    })
-  });
-
-  if (response.ok) {
-    const msg = document.getElementById('saveMsg');
-    msg.classList.add('show');
-    setTimeout(() => msg.classList.remove('show'), 2500);
-  }
-}
-
 const SCHED_KEY = 'lienebelle_schedule';
+
 const DAYS_DEFAULT = [
-  {day:'月',time:'21:00',content:'雑談 / 夢語り',note:'夢の話や\n日常雑談'},
+  {day:'月',time:'21:00',content:'雑談',note:'〈雑談タイトル〉'},
   {day:'火',time:'',content:'',note:''},
-  {day:'水',time:'22:00',content:'ゲーム配信',note:'様々なゲームを\n夢の目で遊ぶ'},
-  {day:'木',time:'',content:'',note:''},
-  {day:'金',time:'21:00',content:'歌枠',note:'夢の声で\n歌をうたう'},
+  {day:'水',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+  {day:'木',time:'21:00',content:'作業配信',note:'〈作業タイトル〉'},
+  {day:'金',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
   {day:'土',time:'',content:'',note:''},
-  {day:'日',time:'20:00',content:'不定期枠',note:'気まぐれな\n夢の時間'},
+  {day:'日',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
 ];
 
-/* 読み込み処理 */
+/* ══ LOAD ══ */
 function loadData(){
-  // 日付（期間）の読み込み
   const savedDuration = localStorage.getItem(SCHED_KEY + '_duration');
   if(savedDuration) {
     document.getElementById('schedDuration').value = savedDuration;
@@ -321,28 +291,53 @@ function loadData(){
   }
 }
 
-/* 保存処理：期間（Duration）とスケジュールを同時に保存 */
-function saveSchedule(){
+/* ══ SAVE (Unified) ══ */
+async function saveSchedule() {
   const data = collectData();
   const duration = document.getElementById('schedDuration').value.trim();
-  
-  localStorage.setItem(SCHED_KEY, JSON.stringify(data));
-  localStorage.setItem(SCHED_KEY + '_duration', duration); // 期間を保存
 
-  const msg = document.getElementById('saveMsg');
-  msg.classList.add('show');
-  setTimeout(()=>msg.classList.remove('show'), 2500);
+  // 1. LocalStorageへ保存
+  localStorage.setItem(SCHED_KEY, JSON.stringify(data));
+  localStorage.setItem(SCHED_KEY + '_duration', duration);
+
+  // 2. Supabaseへ保存
+  try {
+    const response = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=eq.lienebelle`, {
+      method: 'PATCH',
+      headers: {
+        'apikey': SUPABASE_KEY,
+        'Authorization': `Bearer ${SUPABASE_KEY}`,
+        'Content-Type': 'application/json',
+        'Prefer': 'return=minimal'
+      },
+      body: JSON.stringify({
+        data: { duration: duration, days: data }
+      })
+    });
+
+    if (response.ok) {
+      const msg = document.getElementById('saveMsg');
+      msg.classList.add('show');
+      setTimeout(() => msg.classList.remove('show'), 2500);
+    } else {
+      alert("Supabaseへの保存に失敗しました。SQLの設定を確認してください。");
+    }
+  } catch (err) {
+    console.error("Save Error:", err);
+    alert("保存中にエラーが発生しました。");
+  }
 }
 
-/* リセット処理 */
+/* ══ RESET ══ */
 function resetSchedule(){
   if(!confirm('デフォルトのスケジュールに戻しますか？')) return;
   localStorage.removeItem(SCHED_KEY);
-  localStorage.removeItem(SCHED_KEY + '_duration'); // 期間も消去
+  localStorage.removeItem(SCHED_KEY + '_duration');
   document.getElementById('schedDuration').value = '';
   renderRows(DAYS_DEFAULT);
 }
 
+/* ══ RENDER ══ */
 function renderRows(data){
   const container = document.getElementById('dayRows');
   container.innerHTML = data.map((d,i) => {
@@ -378,6 +373,7 @@ function toggleRest(i, isRest){
   if(isRest){
     document.getElementById('time'+i).value = '';
     document.getElementById('content'+i).value = '';
+    document.getElementById('note'+i).value = '';
   }
 }
 
@@ -396,5 +392,6 @@ function collectData(){
 
 // init
 renderRows(loadData());
-</script></body>
+</script>
+</body>
 </html>
