@@ -1088,7 +1088,19 @@ const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.targe
 document.querySelectorAll('.rv').forEach(el=>io.observe(el));
 
 /* ══ SCHEDULE: render from Database (Supabase) ══ */
-// ここに Supabase で取得した情報を入れてください
+const SCHED_KEY = 'lienebelle_schedule';
+const SCHED_DEFAULT = [
+  {day:'月',time:'21:00',content:'雑談',note:'〈雑談タイトル〉'},
+  {day:'火',time:'',content:'',note:''},
+  {day:'水',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+  {day:'木',time:'21:00',content:'作業配信',note:'〈作業タイトル〉'},
+  {day:'金',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+  {day:'土',time:'',content:'',note:''},
+  {day:'日',time:'21:00',content:'ゲーム配信',note:'〈ゲームタイトル〉'},
+];
+const rotations = [-0.7,0.5,-0.4,0.6,-0.5,0.4,-0.3];
+const delays = ['d1','d1','d1','d2','d2','d2','d2'];
+
 const SUPABASE_URL = 'https://bjriwruvryptbxhcencf.supabase.co'; 
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJqcml3cnV2cnlwdGJ4aGNlbmNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM0ODI3MjEsImV4cCI6MjA4OTA1ODcyMX0.LRJOsq5Xd3Cp_MmmWUjqLn850yJ0aYzqeu98XmKeYyE';
 
@@ -1097,7 +1109,6 @@ async function renderSchedule(){
   let duration = "";
 
   try {
-    // データベースからデータを取得
     const response = await fetch(`${SUPABASE_URL}/rest/v1/schedule?id=eq.lienebelle&select=data`, {
       headers: {
         'apikey': SUPABASE_KEY,
@@ -1114,7 +1125,6 @@ async function renderSchedule(){
     console.error("データ取得に失敗しました。デフォルトを表示します。", e);
   }
 
-  // ---【日付（期間）の反映】---
   const periodEl = document.getElementById('schedPeriod');
   if(periodEl) {
     periodEl.textContent = duration;
@@ -1124,7 +1134,6 @@ async function renderSchedule(){
   if(!grid) return;
 
   grid.innerHTML = data.map((d,i) => {
-    // 判定ロジック：空文字の場合は「配信なし」にする
     const hasStream = (d.time && d.time !== '') || (d.content && d.content !== '');
     const noteHtml = (d.note||'—').replace(/\n/g,'<br>');
     return `
@@ -1150,11 +1159,9 @@ async function renderSchedule(){
       </div>
     </div>`;
   
-  // re-observe new elements
   grid.querySelectorAll('.rv').forEach(el => io.observe(el));
 }
 
-// 実行（async関数になったため呼び出し方はそのまま）
 renderSchedule();
 /* ══ MOBILE NAV ══ */
 const mNav=document.getElementById('mNav');
