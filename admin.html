@@ -215,11 +215,132 @@
     }
     .save-msg.show { opacity:1; }
 
+    /* ── image generator ── */
+    .ledger-img {
+      background: var(--page);
+      border-radius: 2px;
+      box-shadow: 0 0 0 1px rgba(100,75,30,.28), 0 8px 40px rgba(0,0,0,.65);
+      padding: 2.5rem 3.5rem 3rem;
+      margin-top: 2rem;
+      position: relative;
+      background-image: repeating-linear-gradient(0deg,transparent 0,transparent 26px,rgba(120,90,30,.07) 26px,rgba(120,90,30,.07) 27px);
+      animation: pageDrop 1s .3s cubic-bezier(.22,.61,.36,1) both;
+    }
+    .ledger-img::before {
+      content:''; position:absolute; inset:0;
+      background: linear-gradient(to right,rgba(80,50,10,.16) 0%,transparent 6%);
+      border-radius:2px; pointer-events:none;
+    }
+    .ledger-img::after {
+      content:''; position:absolute; inset:8px;
+      border:1px solid rgba(120,90,30,.16); border-radius:1px; pointer-events:none;
+    }
+    .ledger-img > * { position:relative; z-index:1; }
+
+    .img-section-label {
+      font-family:'Caveat',cursive; font-size:.88rem;
+      color:var(--faded); display:block; margin-bottom:1.8rem;
+      border-bottom:1px dashed rgba(120,90,30,.2); padding-bottom:.6rem;
+    }
+
+    /* 画像設定グリッド */
+    .img-settings {
+      display:grid; grid-template-columns:1fr 1fr; gap:1.4rem;
+      margin-bottom:1.8rem;
+    }
+    .img-field-group { display:flex; flex-direction:column; gap:.4rem; }
+    .img-field-label {
+      font-family:'Caveat',cursive; font-size:.75rem;
+      color:var(--faded); letter-spacing:.08em;
+    }
+    .img-field-input {
+      font-family:'EB Garamond',serif; font-size:1rem; color:var(--ink);
+      background:rgba(255,255,255,.35);
+      border:none; border-bottom:1px solid rgba(120,90,30,.35);
+      padding:.35rem .2rem; width:100%; outline:none;
+      transition:border-color .2s, background .2s;
+    }
+    .img-field-input:focus {
+      border-bottom-color:var(--wine);
+      background:rgba(255,255,255,.55);
+    }
+
+    /* 曜日別設定 */
+    .img-day-rows { display:flex; flex-direction:column; gap:1rem; margin-bottom:1.8rem; }
+    .img-day-row {
+      display:grid; grid-template-columns:2.2rem 1fr 1fr auto;
+      gap:.6rem 1rem; align-items:center;
+      padding-bottom:1rem;
+      border-bottom:1px solid rgba(120,90,30,.1);
+    }
+    .img-day-row:last-child { border-bottom:none; padding-bottom:0; }
+    .img-day-row.is-rest { opacity:.4; pointer-events:none; }
+    .img-day-label {
+      font-family:'Playfair Display',serif; font-style:italic; font-weight:700;
+      font-size:1.6rem; color:var(--ink); line-height:1;
+    }
+    .img-thumb-wrap {
+      display:flex; align-items:center; gap:.6rem;
+    }
+    .img-thumb {
+      width:64px; height:36px; object-fit:cover;
+      border:1px solid rgba(120,90,30,.25);
+      background:rgba(120,90,30,.08);
+      display:none;
+    }
+    .img-thumb.loaded { display:block; }
+    .img-file-btn {
+      font-family:'Caveat',cursive; font-size:.78rem;
+      color:var(--faded); background:none;
+      border:1px solid rgba(120,90,30,.3);
+      padding:.3rem .7rem; cursor:pointer; border-radius:1px;
+      transition:color .2s, border-color .2s;
+      white-space:nowrap;
+    }
+    .img-file-btn:hover { color:var(--ink3); border-color:rgba(120,90,30,.6); }
+
+    /* プレビューCanvas */
+    .canvas-wrap {
+      margin-top:1.4rem;
+      background:rgba(0,0,0,.15);
+      border:1px solid rgba(120,90,30,.2);
+      border-radius:2px;
+      overflow:hidden;
+      display:flex; justify-content:center;
+    }
+    #previewCanvas {
+      width:100%; height:auto; display:block; max-width:900px;
+    }
+
+    .img-action-bar {
+      display:flex; align-items:center; gap:.8rem; margin-top:1.2rem; flex-wrap:wrap;
+    }
+    .btn-preview {
+      font-family:'Cormorant Unicase',serif; font-size:.75rem; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--ink2);
+      background:rgba(160,124,58,.12); border:1px solid rgba(160,124,58,.4);
+      cursor:pointer; padding:.65rem 1.8rem; border-radius:1px;
+      transition:background .2s, border-color .2s;
+    }
+    .btn-preview:hover { background:rgba(160,124,58,.22); border-color:rgba(160,124,58,.7); }
+    .btn-download {
+      font-family:'Cormorant Unicase',serif; font-size:.75rem; letter-spacing:.2em;
+      text-transform:uppercase; color:var(--page);
+      background:var(--wine); border:none; cursor:pointer;
+      padding:.65rem 1.8rem; border-radius:1px;
+      box-shadow:0 2px 12px rgba(122,30,42,.4);
+      transition:background .2s, transform .15s;
+    }
+    .btn-download:hover { background:var(--wine2); transform:translateY(-1px); }
+
     /* responsive */
     @media(max-width:640px){
-      .ledger-header, .ledger-body { padding:2rem 1.5rem; }
+      .ledger-header, .ledger-body, .ledger-img { padding:2rem 1.5rem; }
       .day-row { grid-template-columns:2rem 1fr 1fr; }
       .day-row .field-group:last-child { grid-column:2/-1; }
+      .img-settings { grid-template-columns:1fr; }
+      .img-day-row { grid-template-columns:2.2rem 1fr; }
+      .img-day-row .img-field-group:last-of-type { grid-column:2; }
     }
   </style>
 </head>
@@ -254,6 +375,36 @@
         <button class="btn-reset" onclick="resetSchedule()">デフォルトに戻す</button>
       </div>
       <div class="save-msg" id="saveMsg">保存しました</div>
+    </div>
+  </div>
+
+  <!-- ══ 画像生成 ══ -->
+  <div class="ledger-img">
+    <span class="img-section-label">スケジュール画像を生成 — Tweet Image</span>
+
+    <!-- 全体設定 -->
+    <div class="img-settings">
+      <div class="img-field-group">
+        <span class="img-field-label">キャッチコピー（画像上部に表示）</span>
+        <input class="img-field-input" id="imgCatch" type="text" placeholder="例：今週もよろしくお願いします！">
+      </div>
+      <div class="img-field-group">
+        <span class="img-field-label">期間表示（自動取得・上書き可）</span>
+        <input class="img-field-input" id="imgPeriod" type="text" placeholder="例：3/10 - 3/16">
+      </div>
+    </div>
+
+    <!-- 曜日別タイトル＋サムネ -->
+    <div class="img-day-rows" id="imgDayRows"></div>
+
+    <!-- プレビュー -->
+    <div class="canvas-wrap">
+      <canvas id="previewCanvas" width="1400" height="900"></canvas>
+    </div>
+
+    <div class="img-action-bar">
+      <button class="btn-preview" onclick="renderImage()">プレビュー更新</button>
+      <button class="btn-download" onclick="downloadImage()">画像をダウンロード</button>
     </div>
   </div>
 
@@ -431,7 +582,379 @@ function collectData(){
 }
 
 // init
-(async () => { renderRows(await loadData()); })();
+(async () => { 
+  const days = await loadData();
+  renderRows(days);
+  initImgRows(days);
+  renderImage();
+})();
+
+/* ══ IMAGE GENERATOR ══ */
+
+// 各曜日の追加データ（タイトル・サムネ画像）
+const imgData = Array(7).fill(null).map(() => ({ title:'', img: null }));
+
+function initImgRows(days){
+  // Periodを自動コピー
+  const dur = document.getElementById('schedDuration')?.value;
+  if(dur) document.getElementById('imgPeriod').value = dur;
+
+  const container = document.getElementById('imgDayRows');
+  container.innerHTML = days.map((d, i) => {
+    const isRest = !d.time && !d.content;
+    return `
+    <div class="img-day-row${isRest?' is-rest':''}" id="imgRow${i}">
+      <div class="img-day-label">${d.day}</div>
+      <div class="img-field-group">
+        <span class="img-field-label">配信タイトル</span>
+        <input class="img-field-input" id="imgTitle${i}" type="text"
+          placeholder="${isRest ? '配信なし' : (d.content || '配信タイトル')}"
+          value="" oninput="imgData[${i}].title=this.value">
+      </div>
+      <div class="img-field-group img-thumb-wrap">
+        <span class="img-field-label">サムネイル画像</span>
+        <div style="display:flex;align-items:center;gap:.6rem;">
+          <img class="img-thumb" id="imgThumb${i}">
+          <button class="img-file-btn" onclick="document.getElementById('imgFile${i}').click()">
+            画像を選択
+          </button>
+          <input type="file" id="imgFile${i}" accept="image/*" style="display:none"
+            onchange="loadThumb(${i}, this)">
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function loadThumb(i, input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const image = new Image();
+    image.onload = () => {
+      imgData[i].img = image;
+      const thumb = document.getElementById('imgThumb'+i);
+      thumb.src = e.target.result;
+      thumb.classList.add('loaded');
+      renderImage();
+    };
+    image.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+async function renderImage(){
+  const canvas = document.getElementById('previewCanvas');
+  const ctx    = canvas.getContext('2d');
+  const W = 1400, H = 900;
+  canvas.width = W; canvas.height = H;
+
+  const days    = collectData();
+  const period  = document.getElementById('imgPeriod')?.value  || '';
+  const catchTx = document.getElementById('imgCatch')?.value   || '';
+
+  // ═══ 背景：ダークデスク ═══
+  ctx.fillStyle = '#14100c';
+  ctx.fillRect(0,0,W,H);
+
+  // レジャーライン（横）
+  ctx.strokeStyle = 'rgba(255,255,255,0.016)';
+  ctx.lineWidth = 1;
+  for(let y=27;y<H;y+=27){ ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(W,y); ctx.stroke(); }
+
+  // 縦ライン（indexのbody::beforeと同じ雰囲気）
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.lineWidth = 2;
+  for(let x=27;x<W;x+=27){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+  ctx.strokeStyle = 'rgba(255,255,255,0.007)';
+  ctx.lineWidth = 2;
+  for(let x=41;x<W;x+=42){ ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,H); ctx.stroke(); }
+
+  // 左スパイン
+  const sg = ctx.createLinearGradient(0,0,55,0);
+  sg.addColorStop(0,'rgba(0,0,0,0.55)'); sg.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = sg; ctx.fillRect(0,0,55,H);
+
+  // 外枠（太め）
+  ctx.strokeStyle = 'rgba(160,124,58,0.55)'; ctx.lineWidth = 2;
+  ctx.strokeRect(3,3,W-6,H-6);
+
+  // 内枠1
+  ctx.strokeStyle = 'rgba(160,124,58,0.2)'; ctx.lineWidth = 1;
+  ctx.strokeRect(12,12,W-24,H-24);
+
+  // 内枠2（さらに内側・細い）
+  ctx.strokeStyle = 'rgba(160,124,58,0.1)'; ctx.lineWidth = 0.5;
+  ctx.strokeRect(20,20,W-40,H-40);
+
+  // コーナーオーナメント（4隅に短いL字ライン）
+  const co = 36; // オーナメント長
+  const cm = 12; // 外枠からの距離
+  ctx.strokeStyle = 'rgba(160,124,58,0.55)'; ctx.lineWidth = 1.5;
+  [[cm,cm,1,0],[W-cm,cm,-1,0],[cm,H-cm,1,0],[W-cm,H-cm,-1,0]].forEach(([x,y,dx,dy])=>{
+    ctx.beginPath();
+    ctx.moveTo(x+dx*co, y); ctx.lineTo(x,y); ctx.lineTo(x, y+(dy||dx)*co);
+    ctx.stroke();
+  });
+  // コーナーの小さな菱形
+  [[cm,cm],[W-cm,cm],[cm,H-cm],[W-cm,H-cm]].forEach(([x,y])=>{
+    ctx.fillStyle = 'rgba(160,124,58,0.5)';
+    ctx.beginPath();
+    ctx.moveTo(x,y-4); ctx.lineTo(x+4,y); ctx.lineTo(x,y+4); ctx.lineTo(x-4,y);
+    ctx.closePath(); ctx.fill();
+  });
+
+  // ═══ ヘッダー ═══
+  const HDR = 112;
+
+  // ヘッダー底ライン
+  ctx.strokeStyle = 'rgba(160,124,58,0.3)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(40,HDR); ctx.lineTo(W-40,HDR); ctx.stroke();
+
+  // 左：アイブロウ
+  ctx.fillStyle = 'rgba(160,124,58,0.5)';
+  ctx.fillRect(44, 38, 22, 1);
+  ctx.font = '400 13px "Cormorant Unicase", serif';
+  ctx.fillStyle = 'rgba(160,124,58,0.55)';
+  ctx.textAlign = 'left';
+  ctx.fillText('Bibliotheca Somnii', 76, 42);
+
+  // 左：Weekly Schedule（メインタイトル）
+  ctx.font = 'italic 700 54px "Playfair Display", serif';
+  ctx.fillStyle = '#d4c4a0';
+  ctx.fillText('Weekly Schedule', 44, 96);
+
+  // 右：期間
+  ctx.textAlign = 'right';
+  if(period){
+    ctx.font = 'italic 400 26px "EB Garamond", serif';
+    ctx.fillStyle = 'rgba(212,196,160,0.7)';
+    ctx.fillText(period, W-44, 82);
+  }
+  // 右：キャッチ
+  if(catchTx){
+    ctx.font = 'italic 400 18px "EB Garamond", serif';
+    ctx.fillStyle = 'rgba(180,160,110,0.5)';
+    ctx.fillText(catchTx, W-44, 104);
+  }
+  ctx.textAlign = 'left';
+
+  // ═══ カードグリッド ═══
+  // 1行目4枚、2行目3枚（中央寄せ）
+  const COLS  = 4;
+  const PAD   = 52;
+  const GAPX  = 22;
+  const GAPY  = 22;
+  const gridY = HDR + 24;
+  const gridH = H - gridY - PAD;
+  const cardW = (W - PAD*2 - GAPX*(COLS-1)) / COLS;
+  const cardH = (gridH - GAPY) / 2;
+
+  // 傾き：各カード異なるランダム性（固定シードで毎回同じ見た目）
+  const rotations = [-1.2, 0.8, -0.5, 1.0, 0.6, -0.9, 0.4];
+  // 縦オフセット（カードが少しずれて積まれた感）
+  const offsets = [4, -6, 8, -3, -7, 5, -4];
+
+  for(let i=0; i<7; i++){
+    const col  = i % COLS;
+    const row  = Math.floor(i / COLS);
+
+    // 2行目（3枚）は中央寄せ
+    const rowCount = row === 0 ? 4 : 3;
+    const rowTotalW = rowCount * cardW + (rowCount-1) * GAPX;
+    const rowStartX = (W - rowTotalW) / 2;
+    const colInRow  = i < 4 ? col : (i - 4);
+
+    const bx   = rowStartX + colInRow*(cardW+GAPX);
+    const by   = gridY + row*(cardH+GAPY) + offsets[i];
+    const midX = bx + cardW/2;
+    const midY = by + cardH/2;
+    const rot  = rotations[i] * Math.PI/180;
+    const d    = days[i];
+    const hasStream = !!(d.time || d.content);
+
+    ctx.save();
+    ctx.translate(midX, midY);
+    ctx.rotate(rot);
+    ctx.translate(-midX, -midY);
+
+    // ── カード本体（ベージュ） ──
+    ctx.fillStyle = hasStream ? '#ece2cc' : '#e2d9c2';
+    roundRect(ctx, bx, by, cardW, cardH, 2);
+    ctx.fill();
+
+    // カード横罫線
+    ctx.strokeStyle = 'rgba(120,90,30,0.07)'; ctx.lineWidth = 1;
+    for(let ly=by+27; ly<by+cardH; ly+=27){
+      ctx.beginPath(); ctx.moveTo(bx,ly); ctx.lineTo(bx+cardW,ly); ctx.stroke();
+    }
+
+    // カード枠
+    ctx.strokeStyle = 'rgba(120,90,30,0.3)'; ctx.lineWidth = 1;
+    roundRect(ctx, bx, by, cardW, cardH, 2);
+    ctx.stroke();
+
+    // 内枠
+    ctx.strokeStyle = 'rgba(120,90,30,0.12)'; ctx.lineWidth = 0.5;
+    roundRect(ctx, bx+6, by+6, cardW-12, cardH-12, 1);
+    ctx.stroke();
+
+    // 左スパイン影
+    const cs = ctx.createLinearGradient(bx,0,bx+18,0);
+    cs.addColorStop(0,'rgba(80,50,10,0.18)'); cs.addColorStop(1,'rgba(80,50,10,0)');
+    ctx.fillStyle = cs; ctx.fillRect(bx,by,18,cardH);
+
+    const INNER_PAD = 18;
+    const tx = bx + INNER_PAD;
+
+    if(!hasStream){
+      // ─ 配信なし：restスタンプ（大きめ） ─
+      ctx.font = 'italic 700 42px "Playfair Display", serif';
+      ctx.fillStyle = 'rgba(40,32,14,0.4)';
+      ctx.textAlign = 'left';
+      ctx.fillText(d.day, tx, by+58);
+
+      // 大きめの丸スタンプ（カード中央）
+      const sx = midX, sy = by + cardH/2 + 14;
+      const sr = 38;
+      ctx.strokeStyle = 'rgba(120,90,30,0.28)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(sx,sy,sr,0,Math.PI*2); ctx.stroke();
+      ctx.strokeStyle = 'rgba(120,90,30,0.12)'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(sx,sy,sr-6,0,Math.PI*2); ctx.stroke();
+      // スタンプテキスト
+      ctx.font = '300 13px "Cormorant Unicase", serif';
+      ctx.fillStyle = 'rgba(120,90,30,0.4)';
+      ctx.textAlign = 'center';
+      ctx.fillText('rest', sx, sy+5);
+      ctx.fillText('day',  sx, sy+20);
+
+    } else {
+      // ─ 配信あり ─
+
+      // 曜日（大きく）
+      ctx.font = 'italic 700 46px "Playfair Display", serif';
+      ctx.fillStyle = '#28200e';
+      ctx.textAlign = 'left';
+      ctx.fillText(d.day, tx, by+56);
+
+      // 曜日下区切り線
+      ctx.strokeStyle = 'rgba(160,124,58,0.25)'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(tx, by+62); ctx.lineTo(bx+cardW-INNER_PAD, by+62);
+      ctx.stroke();
+
+      // サムネイル
+      const img = imgData[i]?.img;
+      const thX = tx;
+      const thY = by + 70;
+      const thW = cardW - INNER_PAD*2;
+      const thH = thW * (9/16);
+
+      if(img){
+        let sw=img.width, sh=img.height;
+        if(sw/sh > thW/thH){ sw=sh*(thW/thH); } else { sh=sw/(thW/thH); }
+        const ssx=(img.width-sw)/2, ssy=(img.height-sh)/2;
+        ctx.save();
+        roundRect(ctx, thX, thY, thW, thH, 2);
+        ctx.clip();
+        ctx.drawImage(img, ssx, ssy, sw, sh, thX, thY, thW, thH);
+        ctx.restore();
+        ctx.strokeStyle='rgba(120,90,30,0.3)'; ctx.lineWidth=1;
+        roundRect(ctx, thX, thY, thW, thH, 2); ctx.stroke();
+      } else {
+        ctx.fillStyle='rgba(120,90,30,0.06)';
+        roundRect(ctx, thX, thY, thW, thH, 2); ctx.fill();
+        ctx.strokeStyle='rgba(120,90,30,0.18)'; ctx.lineWidth=1;
+        ctx.setLineDash([4,4]);
+        roundRect(ctx, thX, thY, thW, thH, 2); ctx.stroke();
+        ctx.setLineDash([]);
+        ctx.font='300 11px "Cormorant Unicase", serif';
+        ctx.fillStyle='rgba(120,90,30,0.3)';
+        ctx.textAlign='center';
+        ctx.fillText('no image', midX, thY+thH/2+4);
+      }
+
+      let textY = thY + thH + 18;
+
+      // 時刻
+      if(d.time){
+        ctx.font='400 15px "Caveat", cursive';
+        ctx.fillStyle='#8a7050';
+        ctx.textAlign='left';
+        ctx.fillText(d.time + ' —', tx, textY);
+        textY += 19;
+      }
+
+      // 配信内容
+      if(d.content){
+        ctx.font='400 16px "EB Garamond", serif';
+        ctx.fillStyle='#3e3018';
+        ctx.textAlign='left';
+        ctx.fillText(d.content, tx, textY);
+        textY += 19;
+      }
+
+      // カスタムタイトル
+      const title = imgData[i]?.title||'';
+      if(title){
+        ctx.font='italic 400 13px "EB Garamond", serif';
+        ctx.fillStyle='rgba(100,80,40,0.65)';
+        ctx.textAlign='left';
+        wrapText(ctx, title, tx, textY, cardW-INNER_PAD*2, 16);
+      }
+    }
+
+    ctx.restore();
+  }
+
+  // ═══ フッター ═══
+  ctx.strokeStyle='rgba(160,124,58,0.2)'; ctx.lineWidth=1;
+  ctx.beginPath(); ctx.moveTo(40,H-30); ctx.lineTo(W-40,H-30); ctx.stroke();
+  ctx.font='300 11px "Cormorant Unicase", serif';
+  ctx.fillStyle='rgba(160,124,58,0.35)';
+  ctx.textAlign='center';
+  ctx.fillText('✥  Lienebelle  —  Bibliotheca Somnii  ✥', W/2, H-14);
+  ctx.textAlign='left';
+}
+// 角丸矩形ヘルパー
+function roundRect(ctx, x, y, w, h, r){
+  ctx.beginPath();
+  ctx.moveTo(x+r, y);
+  ctx.lineTo(x+w-r, y); ctx.arcTo(x+w,y,x+w,y+r,r);
+  ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w,y+h,x+w-r,y+h,r);
+  ctx.lineTo(x+r, y+h); ctx.arcTo(x,y+h,x,y+h-r,r);
+  ctx.lineTo(x, y+r); ctx.arcTo(x,y,x+r,y,r);
+  ctx.closePath();
+}
+
+// テキスト折り返しヘルパー
+function wrapText(ctx, text, x, y, maxW, lineH){
+  const words = text.split('');
+  let line = '';
+  let lineY = y;
+  for(let n = 0; n < words.length; n++){
+    const testLine = line + words[n];
+    if(ctx.measureText(testLine).width > maxW && n > 0){
+      ctx.fillText(line, x, lineY);
+      line = words[n];
+      lineY += lineH;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line, x, lineY);
+}
+
+function downloadImage(){
+  renderImage();
+  const canvas = document.getElementById('previewCanvas');
+  const link = document.createElement('a');
+  const period = (document.getElementById('imgPeriod')?.value || 'schedule').replace(/[\/\s]/g,'-');
+  link.download = `lienebelle_schedule_${period}.png`;
+  link.href = canvas.toDataURL('image/png');
+  link.click();
+}
 </script>
 </body>
 </html>
