@@ -354,7 +354,7 @@
     
     <div class="header-date-field" style="margin-top: 1.2rem; display: flex; align-items: center; gap: 0.8rem;">
       <span style="font-family:'Cormorant Unicase',serif; font-size:.65rem; letter-spacing:.25em; color:var(--gold2); text-transform:uppercase;">Period:</span>
-      <input type="text" id="schedDuration" placeholder="例：2/24 - 3/2" style="background:none; border:none; border-bottom:1px solid rgba(120,90,30,.3); font-family:'EB Garamond',serif; font-size:1.1rem; color:var(--ink); width:220px; outline:none; padding: 2px 5px;">
+      <input type="text" id="schedDuration" placeholder="例：2/24 - 3/2" style="background:none; border:none; border-bottom:1px solid rgba(120,90,30,.3); font-family:'EB Garamond',serif; font-size:1.1rem; color:var(--ink); width:220px; outline:none; padding: 2px 5px;" oninput="document.getElementById('imgPeriod').value = this.value; renderImage();">
     </div>
     <div class="header-rule"></div>
     <p class="header-note">
@@ -378,26 +378,22 @@
     </div>
   </div>
 
-  <!-- ══ 画像生成 ══ -->
   <div class="ledger-img">
     <span class="img-section-label">スケジュール画像を生成 — Tweet Image</span>
 
-    <!-- 全体設定 -->
     <div class="img-settings">
       <div class="img-field-group">
         <span class="img-field-label">キャッチコピー（画像上部に表示）</span>
-        <input class="img-field-input" id="imgCatch" type="text" placeholder="例：今週もよろしくお願いします！">
+        <input class="img-field-input" id="imgCatch" type="text" placeholder="例：今週もよろしくお願いします！" oninput="renderImage()">
       </div>
       <div class="img-field-group">
         <span class="img-field-label">期間表示（自動取得・上書き可）</span>
-        <input class="img-field-input" id="imgPeriod" type="text" placeholder="例：3/10 - 3/16">
+        <input class="img-field-input" id="imgPeriod" type="text" placeholder="例：3/10 - 3/16" oninput="renderImage()">
       </div>
     </div>
 
-    <!-- 曜日別タイトル＋サムネ -->
     <div class="img-day-rows" id="imgDayRows"></div>
 
-    <!-- プレビュー -->
     <div class="canvas-wrap">
       <canvas id="previewCanvas" width="1400" height="900"></canvas>
     </div>
@@ -526,6 +522,7 @@ function resetSchedule(){
   localStorage.removeItem(SCHED_KEY + '_duration');
   document.getElementById('schedDuration').value = '';
   renderRows(DAYS_DEFAULT);
+  renderImage();
 }
 
 /* ══ RENDER ══ */
@@ -543,19 +540,19 @@ function renderRows(data){
       <div class="stream-fields-wrap">
         <div class="field-group stream-fields">
           <span class="field-label">開始時間</span>
-          <input class="field-input" id="time${i}" type="text" placeholder="例：21:00" value="${d.time||''}">
+          <input class="field-input" id="time${i}" type="text" placeholder="例：21:00" value="${d.time||''}" oninput="renderImage()">
         </div>
         <div class="field-group stream-fields">
           <span class="field-label">内容</span>
-          <input class="field-input" id="content${i}" type="text" placeholder="例：雑談 / 歌枠" value="${d.content||''}">
+          <input class="field-input" id="content${i}" type="text" placeholder="例：雑談 / 歌枠" value="${d.content||''}" oninput="renderImage()">
         </div>
         <div class="field-group stream-fields">
           <span class="field-label">配信タイトル</span>
-          <input class="field-input" id="title${i}" type="text" placeholder="例：〇〇をやってみた" value="${d.title||''}">
+          <input class="field-input" id="title${i}" type="text" placeholder="例：〇〇をやってみた" value="${d.title||''}" oninput="renderImage()">
         </div>
         <div class="field-group stream-fields">
           <span class="field-label">カード裏メモ</span>
-          <textarea class="field-textarea" id="note${i}" placeholder="カードを裏返したとき表示されるメモ">${d.note||''}</textarea>
+          <textarea class="field-textarea" id="note${i}" placeholder="カードを裏返したとき表示されるメモ" oninput="renderImage()">${d.note||''}</textarea>
         </div>
       </div>
     </div>`;
@@ -570,6 +567,7 @@ function toggleRest(i, isRest){
     document.getElementById('content'+i).value = '';
     document.getElementById('note'+i).value = '';
   }
+  renderImage();
 }
 
 function collectData(){
